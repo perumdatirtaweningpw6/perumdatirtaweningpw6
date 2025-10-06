@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GIS PDAM - PW6</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="css/styles.css" rel="stylesheet" />
+  <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+
+  <style>
+    body { margin: 0; padding: 0; }
+    .sb-topnav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      height: 60px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    #layoutSidenav_content { margin-top: 65px; padding-bottom: 20px; }
+    #map {
+      height: 500px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .legend h4 { margin: 0 0 6px; font-size: 14px; font-weight: bold; }
+    .legend div { line-height: 1.2; }
+    .highlighted {
+      weight: 6 !important;
+      color: #ff4500 !important;
+    }
+  </style>
+</head>
+
+<body class="sb-nav-fixed">
+  <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <a class="main_sticky_l" href="index.html" title="Perumda Tirtawening">
+      <img src="https://perumdatirtawening.co.id/asset/image/logo-horizon-kecils.gif" alt="Perumda Tirtawening" width='200px' />
+    </a>
+  </nav>
+
+  <div id="layoutSidenav_content">
+    <main>
+      <div class="container-fluid px-4">
+        <h1 class="mt-4">GIS Pelanggan PDAM</h1>
+        <ol class="breadcrumb mb-4">
+          <li class="breadcrumb-item active">SPAM TEGALEGA</li>
+        </ol>
+
+        <!-- MAP + SEARCH -->
+        <div class="card mb-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+              <i class="fas fa-map me-1"></i>
+              Peta Pelanggan & Jaringan Pipa
+            </div>
+            <div class="d-flex align-items-center">
+              <input id="searchInput" type="text" placeholder="Cari No Pelanggan / Alamat..." class="form-control form-control-sm" style="width: 250px; margin-right: 8px;">
+              <button id="searchBtn" class="btn btn-success btn-sm"><i class="fas fa-search"></i> Cari</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="map"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    var map = L.map('map').setView([-6.9514, 107.6327], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // === Layers ===
+    var layerPelanggan = L.layerGroup().addTo(map);
+    var layerPipa = L.layerGroup().addTo(map);
+    var layerPipaExisting = L.layerGroup().addTo(map);
+    var layerPipaSpam = L.layerGroup().addTo(map);
+    var layerDMA = L.layerGroup().addTo(map);
+    var markerIndex = {};
+    var highlightedLayer = null;
+
+    // === Icon pelanggan ===
+    const iconBase = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/";
+    const icons = {
+      aktif: L.icon({ iconUrl: iconBase + "marker-icon-green.png", iconSize: [10, 10], iconAnchor: [10, 30], popupAnchor: [0, -28] }),
+      nonaktif: L.icon({ iconUrl: iconBase + "marker-icon-red.png", iconSize: [10, 10], iconAnchor: [10, 30], popupAnchor: [0, -28] }),
+      calon: L.icon({ iconUrl: iconBase + "marker-icon-yellow.png", iconSize: [10, 10], iconAnchor: [10, 30], popupAnchor: [0, -28] }),
+      default: L.icon({ iconUrl: iconBase + "marker-icon-blue.png", iconSize: [10, 10], iconAnchor: [10, 30], popupAnchor: [0, -28] })
+    };
+
+    // === Style dinamis pipa ===
+    function styleLine(feature) {
+      const p = feature.properties;
+      const jenis = (p.jenis_pipa || "").trim().toUpperCase();
+      const material = (p.material_p || "").trim().toUpperCase();
+      const diameter = parseFloat(p.di) || 50;
+
+      // Warna by jenis_pipa dan material
+      let color = "#555";
+      if (jenis === "T") color = "#007bff"; // Transmisi
+      else if (jenis === "S") color = "#28a745"; // Sekunder
+      else if (jenis === "D") color = "#ffc107"; // Distribusi
+      else if (jenis === "L") color = "#ff0000"; // Lainnya
+      if (material === "DIP") color = "#663399"; // DIP ungu
+
+      // Ketebalan by diameter
+      const weight = diameter < 50 ? 2 : diameter < 100 ? 3 : diameter < 200 ? 4 : 5;
+
+      return { color, weight, opacity: 0.9 };
+    }
+
+    // === Load GeoJSON ===
+    const geojsonFiles = [
+      { url: 'Titikbangunan3oct.geojson', type: 'point', layer: layerPelanggan },
+      { url: 'pipa.geojson', type: 'line', layer: layerPipa },
+      { url: 'pipaexisting.geojson', type: 'line', layer: layerPipaExisting },
+      { url: 'pipaspamtegalega.geojson', type: 'line', layer: layerPipaSpam },
+      { url: 'DMA.geojson', type: 'polygon', layer: layerDMA }
+    ];
+
+    geojsonFiles.forEach(file => {
+      fetch(file.url)
+        .then(res => res.json())
+        .then(data => {
+          if (file.type === 'point') {
+            // Pelanggan
+            L.geoJSON(data, {
+              pointToLayer: (feature, latlng) => {
+                const p = feature.properties;
+                const noPel = p.no_pel || p["no pel"];
+                const status = (p.status || "Aktif").toLowerCase();
+
+                let icon = icons.default;
+                if (status.includes("aktif")) icon = icons.aktif;
+                else if (status.includes("non")) icon = icons.nonaktif;
+                else if (status.includes("calon")) icon = icons.calon;
+
+                const marker = L.marker(latlng, { icon });
+                let popup = `<b>No Pel:</b> ${noPel || ''}<br>`;
+                popup += `<b>Alamat:</b> ${p.alamat || ''}<br>`;
+                popup += `<b>Status:</b> ${p.status || 'Aktif'}<br>`;
+                if (p.foto) popup += `<img src="${p.foto}" width="200"><br>`;
+                marker.bindPopup(popup);
+
+                if (noPel) markerIndex[noPel.toLowerCase()] = marker;
+                if (p.alamat) markerIndex[p.alamat.toLowerCase()] = marker;
+                return marker;
+              }
+            }).addTo(file.layer);
+          } 
+          else if (file.type === 'line') {
+            // Pipa
+            L.geoJSON(data, {
+              style: styleLine,
+              onEachFeature: (feature, layer) => {
+                const p = feature.properties;
+                const popup = `
+                  <b>Jenis Pipa:</b> ${p.fid || '-'}<br>
+                  <b>Material:</b> ${p.material_p || '-'}<br>
+                  <b>Diameter:</b> ${p.dia || '-'} mm<br>
+                  <b>Tahun Pasang:</b> ${p.thn_pasang || '-'}<br>
+                  <b>Lokasi:</b> ${p.coordinates || '-'}
+                `;
+                layer.bindPopup(popup);
+
+                // === Highlight saat diklik ===
+                layer.on('click', function() {
+                  if (highlightedLayer) {
+                    highlightedLayer.setStyle(styleLine(highlightedLayer.feature));
+                  }
+                  layer.setStyle({ color: '#ff4500', weight: 6 });
+                  highlightedLayer = layer;
+                  map.fitBounds(layer.getBounds(), { maxZoom: 18 });
+                });
+              }
+            }).addTo(file.layer);
+          } 
+          else {
+            // DMA
+            L.geoJSON(data, { style: { color: "#ff0000", weight: 2, opacity: 0.8, fillOpacity: 0.1 } }).addTo(file.layer);
+          }
+        })
+        .catch(err => console.error("❌ Gagal load:", file.url, err));
+    });
+
+    // === Layer Control ===
+    const overlays = {
+      "Pelanggan": layerPelanggan,
+      "Pipa Transmisi": layerPipa,
+      "Pipa Existing": layerPipaExisting,
+      "Pipa SPAM Tegalega": layerPipaSpam,
+      "Wilayah DMA": layerDMA
+    };
+    L.control.layers(null, overlays, { collapsed: false }).addTo(map);
+
+    // === Legend ===
+    const legend = L.control({ position: "bottomright" });
+    legend.onAdd = function () {
+      const div = L.DomUtil.create("div", "info legend");
+      div.innerHTML = `
+        <h4>Pelanggan</h4>
+        <i style="background:green;width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:5px;"></i> Aktif<br>
+        <i style="background:red;width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:5px;"></i> Nonaktif<br>
+        <i style="background:gold;width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:5px;"></i> Calon<br><br>
+        <b>Pipa:</b><br>
+        <i style="background:#007bff;width:20px;height:3px;display:inline-block;margin-right:5px;"></i> Transmisi<br>
+        <i style="background:#28a745;width:20px;height:3px;display:inline-block;margin-right:5px;"></i> Sekunder<br>
+        <i style="background:#ffc107;width:20px;height:3px;display:inline-block;margin-right:5px;"></i> Distribusi<br>
+        <i style="background:#663399;width:20px;height:3px;display:inline-block;margin-right:5px;"></i> DIP<br>
+        <i style="background:#ff0000;width:20px;height:3px;display:inline-block;margin-right:5px;"></i> Lainnya
+      `;
+      div.style.background = "white";
+      div.style.padding = "8px 12px";
+      div.style.borderRadius = "8px";
+      div.style.boxShadow = "0 0 6px rgba(0,0,0,0.2)";
+      div.style.fontSize = "13px";
+      return div;
+    };
+    legend.addTo(map);
+
+    // === Search ===
+    document.getElementById("searchBtn").addEventListener("click", function() {
+      const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+      if (!keyword) return alert("Masukkan No Pelanggan atau Alamat terlebih dahulu!");
+
+      const foundMarker = markerIndex[keyword];
+      if (foundMarker) {
+        map.setView(foundMarker.getLatLng(), 18);
+        foundMarker.openPopup();
+      } else {
+        alert("Data tidak ditemukan!");
+      }
+    });
+  </script>
+</body>
+</html>
