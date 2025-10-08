@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Aduan - PDAM</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background:#1a1d20; color:#eee; font-family:'Poppins',sans-serif; }
+    header { background:linear-gradient(90deg,#004b8d,#007bff); color:#fff; text-align:center; padding:15px; font-weight:600; position:relative; }
+    .container { max-width:1200px; margin-top:30px; }
+    .table-dark th { background-color:#007bff; }
+    .table-dark tr:hover { background-color:#2b3035!important; }
+    .status-badge { padding:6px 10px; border-radius:8px; font-size:13px; font-weight:600; text-transform:capitalize; }
+    .baru{background:#ffc107;color:#222;} 
+    .proses{background:#17a2b8;color:#fff;} 
+    .selesai{background:#28a745;color:#fff;}
+    .logout{position:absolute;right:20px;top:15px;background:#dc3545;border:none;padding:5px 10px;border-radius:5px;color:white;font-size:13px;}
+  </style>
+</head>
+<body>
+  <header>
+    💧 Dashboard Aduan Pelanggan
+    <button class="logout" onclick="logout()">Logout</button>
+  </header>
+
+  <div class="container">
+    <h3 class="mb-3">📋 Daftar Aduan</h3>
+    <div id="loading">Memuat data...</div>
+
+    <div class="table-responsive">
+      <table class="table table-dark table-striped" id="aduanTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Nama</th>
+            <th>Aduan</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="aduanBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // === CEK LOGIN ===
+    if (localStorage.getItem("auth") !== "true") {
+      window.location.href = "login.html";
+    }
+
+    // 🔗 GANTI DENGAN URL WEB APP KAMU (akhiran /exec)
+    const sheetURL = "https://script.google.com/macros/s/AKfycbzk_h3u-dctLEMBeRZYg1p9ply5ETTzgdhY06uegNk8jGoZhlThOuqm6Z_4_hwaRDSF/exec";
+
+    const table = document.getElementById("aduanTable");
+    const tbody = document.getElementById("aduanBody");
+    const loading = document.getElementById("loading");
+
+    async function loadData() {
+      loading.style.display = "block";
+      table.style.display = "none";
+      tbody.innerHTML = "";
+
+      try {
+        const res = await fetch(sheetURL);
+        const data = await res.json();
+
+        if (!data.length) {
+          loading.textContent = "Belum ada data aduan.";
+          return;
+        }
+
+        data.forEach((row, i) => {
+          const status = (row.status || "baru").toLowerCase();
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${row.tanggal || "-"}</td>
+            <td>${row.nama || "-"}</td>
+            <td>${row.aduan || "-"}</td>
+            <td><span class="status-badge ${status}">${status}</span></td>
+            <td>
+              <select class="form-select form-select-sm" onchange="updateStatus(${i}, this.value)">
+                <option value="baru" ${status=="baru"?"selected":""}>Baru</option>
+                <option value="proses" ${status=="proses"?"selected":""}>Diproses</option>
+                <option value="selesai" ${status=="selesai"?"selected":""}>Selesai</option>
+              </select>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        loading.style.display = "none";
+        table.style.display = "table";
+      } catch (err) {
+        loading.textContent = "Gagal memuat data!";
+      }
+    }
+
+    // === Update status ke Apps Script ===
+    async function updateStatus(index, newStatus) {
+      try {
+        const res = await fetch(`${sheetURL}?update=${index}&status=${newStatus}`);
+        const json = await res.json();
+
+        if (json.result === "ok") {
+          alert("✅ Status berhasil diperbarui!");
+          loadData(); // refresh data biar warna ikut berubah
+        } else {
+          alert("⚠️ Gagal memperbarui status!");
+        }
+      } catch (err) {
+        alert("❌ Koneksi ke server gagal!");
+      }
+    }
+
+    // === Logout ===
+    function logout() {
+      localStorage.removeItem("auth");
+      window.location.href = "login.html";
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

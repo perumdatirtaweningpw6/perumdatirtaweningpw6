@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Form Pengaduan PDAM</title>
+<style>
+body { background:#f4f6fa; font-family:"Poppins",sans-serif; padding:20px; }
+.container { max-width:420px; background:white; margin:auto; border-radius:10px;
+  padding:20px; box-shadow:0 4px 8px rgba(0,0,0,0.2); }
+label {display:block;margin-top:10px;font-weight:600;}
+input,select,textarea { width:100%; padding:8px; margin-top:5px;
+  border-radius:6px; border:1px solid #ccc; }
+button { margin-top:15px; background:#007bff; color:#fff; border:none;
+  padding:10px 16px; border-radius:8px; cursor:pointer; }
+.success {color:green;font-weight:500;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Form Pengaduan PDAM</h2>
+  <form id="aduanForm">
+    <label>ID Pelanggan</label>
+    <input type="text" id="id" required>
+
+    <label>Nama</label>
+    <input type="text" id="nama" required>
+
+    <label>Jenis Pengaduan</label>
+    <select id="jenis">
+      <option value="Air Mati">Air Mati</option>
+      <option value="Kebocoran">Kebocoran</option>
+      <option value="Meter Rusak">Meter Rusak</option>
+      <option value="Tagihan Tidak Wajar">Tagihan Tidak Wajar</option>
+    </select>
+
+    <label>Deskripsi</label>
+    <textarea id="deskripsi" rows="4" required></textarea>
+
+    <button type="submit">Kirim Pengaduan</button>
+    <div class="success" id="statusMsg"></div>
+  </form>
+</div>
+
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbxEjAMfJp6u2_u3SDf6xiJTsBfuHVqQ2zSDzp_dwnKwcsLvI58GuFczWTI17je-y4Q/exec";
+
+document.getElementById("aduanForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const data = {
+    id: document.getElementById("id").value,
+    nama: document.getElementById("nama").value,
+    tanggal: new Date().toISOString().split("T")[0],
+    jenis: document.getElementById("jenis").value,
+    deskripsi: document.getElementById("deskripsi").value
+  };
+
+  const res = await fetch(scriptURL + "?mode=addPengaduan", {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
+
+  const json = await res.json();
+  if(json.status === "success"){
+    document.getElementById("statusMsg").innerText = "✅ Pengaduan berhasil dikirim!";
+    e.target.reset();
+  }
+});
+</script>
+</body>
+</html>

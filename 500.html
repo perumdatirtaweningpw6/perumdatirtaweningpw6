@@ -1,55 +1,154 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>404 Error - SB Admin</title>
-        <link href="css/styles.css" rel="stylesheet" />
-        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-    </head>
-    <body>
-        <div id="layoutError">
-            <div id="layoutError_content">
-                <main>
-                    <div class="container">
-                        <div class="row justify-content-center">
-                            <div class="col-lg-6">
-                                <div class="text-center mt-4">
-                                    <h1 class="display-1">500</h1>
-                                    <p class="lead">Internal Server Error</p>
-                                    <a href="index.html">
-                                        <i class="fas fa-arrow-left me-1"></i>
-                                        Return to Dashboard
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-            </div>
-            <div id="layoutError_footer">
-                 <footer class="py-4 bg-light mt-auto">
-                    <div class="container-fluid px-4">
-                        <div id="layoutAuthentication_footer">
-                <footer class="py-4 bg-light mt-auto">
-                    <div class="container-fluid px-4">
-                        <div class="d-flex align-items-center justify-content-between small">
-                            <div class="text-muted">Copyright &copy; Your Website 2025</div>
-                            <div>
-                                <a href="#">PERUMDA TIRTAWENING PW6</a>
-                                &middot;
-                                <a href="#">085161600614 </a>
-                            </div>
-                            </div>
-                        </div>
-                    </div>
-                </footer>
-            </div>
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-        <script src="js/scripts.js"></script>
-    </body>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Form Aduan Pelanggan</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #2196f3, #21cbf3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      color: #333;
+    }
+
+    .form-container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+      max-width: 420px;
+      width: 100%;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #2196f3;
+    }
+
+    label {
+      font-weight: 500;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 15px;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #2196f3;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #2196f3;
+      border: none;
+      color: #fff;
+      font-weight: 600;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #1b82e2;
+    }
+
+    .alert {
+      text-align: center;
+      font-weight: 500;
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .alert.success { background: #d4edda; color: #155724; }
+    .alert.error { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Form Aduan Pelanggan</h2>
+    <form id="aduanForm">
+      <label for="nama">Nama Lengkap</label>
+      <input type="text" id="nama" name="nama" placeholder="Masukkan nama kamu" required>
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="Masukkan email aktif" required>
+
+      <label for="nohp">Nomor HP</label>
+      <input type="text" id="nohp" name="nohp" placeholder="Masukkan nomor HP kamu" required>
+
+      <label for="aduan">Isi Aduan</label>
+      <textarea id="aduan" name="aduan" placeholder="Tuliskan aduan kamu..." required></textarea>
+
+      <button type="submit">Kirim Aduan</button>
+      <div id="alertBox" class="alert"></div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("aduanForm");
+    const alertBox = document.getElementById("alertBox");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      alertBox.style.display = "none";
+
+      const data = new FormData(form);
+
+      try {
+        const response = await fetch(
+          "https://script.google.com/macros/s/AKfycbxyCCHCNzoE95u8KYDVH987GeXN7CIWchmwFmBd_Ym7-c9JexJ0Z52fY5PTFo2Ar_c/exec",
+          { method: "POST", body: data }
+        );
+
+        const result = await response.json();
+
+        if (result.status === "success") {
+          alertBox.textContent = result.message;
+          alertBox.className = "alert success";
+          alertBox.style.display = "block";
+          form.reset();
+        } else {
+          alertBox.textContent = result.message;
+          alertBox.className = "alert error";
+          alertBox.style.display = "block";
+        }
+
+      } catch (error) {
+        alertBox.textContent = "Terjadi kesalahan. Coba lagi nanti.";
+        alertBox.className = "alert error";
+        alertBox.style.display = "block";
+      }
+    });
+  </script>
+</body>
 </html>
