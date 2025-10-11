@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registrasi Teknisi | PDAM</title>
+
+  <!-- libs -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet"/>
+
+  <style>
+    :root { --brand:#4db8ff; --ink:#cfeaff; --panel: rgba(16, 40, 78, 0.85); --panel-soft: rgba(16, 40, 78, 0.65); }
+    body { background:#0b1f3b; color:#fff; font-family:'Segoe UI',sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; }
+    .card { background: var(--panel); border:none; border-radius:18px; color:#fff; box-shadow:0 0 15px rgba(0,0,0,.3); }
+    .form-control { background: rgba(255,255,255,0.08); color:#fff; border:1px solid rgba(255,255,255,0.15); }
+    .form-control::placeholder{ color:#cfeaff; opacity:.6; }
+    .btn-brand { background: var(--brand); color:#07263f; border:none; }
+    .btn-brand:hover{ background:#64c2ff; }
+    a { color: var(--ink); }
+  </style>
+</head>
+<body>
+  <div class="container px-3">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5" data-aos="zoom-in">
+        <div class="card p-4">
+          <div class="text-center mb-3">
+            <img src="https://perumdatirtawening.co.id/asset/image/logo-horizon-kecils.gif" alt="Logo" height="60"/>
+            <p class="text-secondary mb-0">Isi data berikut untuk membuat akun</p>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input id="nama" type="text" class="form-control" placeholder="Nama Lengkap" autocomplete="name" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input id="email" type="email" class="form-control" placeholder="perumdatirtawening@gmail.com" autocomplete="email" required>
+          </div>
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label">PIN</label>
+              <input id="pin" type="password" class="form-control" placeholder="4-6 digit" inputmode="numeric" autocomplete="new-password" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Konfirmasi PIN</label>
+              <input id="pin2" type="password" class="form-control" placeholder="Ulangi PIN" inputmode="numeric" autocomplete="new-password" required>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-1">
+            <small class="text-secondary">PIN hanya angka, min 4 digit.</small>
+            <a href="loginTeknisi.html" class="small">Sudah punya akun? Login</a>
+          </div>
+
+          <button class="btn btn-brand w-100 mt-3" id="btnReg">
+            <i class="fas fa-user-plus me-2"></i>Daftar
+          </button>
+
+          <div id="msg" class="mt-3"></div>
+
+          <hr class="border-secondary opacity-25 my-4"/>
+          <div class="text-center">
+            <span class="text-secondary small">Pendaftaran dapat memerlukan persetujuan admin.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+  <script>AOS.init({duration:800, once:true});</script>
+
+  <script>
+  // ================== KONFIG (samakan dengan login) ==================
+  // GANTI dengan URL Web App GAS kamu (Deploy: Execute as Me, Anyone)
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbwMLCYvMZIM9uMuZlzqsnhroINTh8gcLr9fQcbQLTTP4LcqzBSO50hFJCfAFncBNnW5Bw/exec";
+
+  // Setelah registrasi sukses, arahkan ke halaman login
+  const AFTER_REGISTER = "loginTeknisi.html";
+
+  // ================== UTIL ==================
+  const $ = (id)=>document.getElementById(id);
+  function alertMsg(type, text){
+    $("msg").innerHTML = `<div class="alert alert-${type} mt-3">${text}</div>`;
+  }
+  function setLoading(disabled){
+    $("btnReg").disabled = disabled;
+    $("btnReg").innerHTML = disabled ? `<span class="spinner-border spinner-border-sm me-2"></span>Memproses...` : `<i class=\"fas fa-user-plus me-2\"></i>Daftar`;
+  }
+  function validEmail(v){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  }
+  function onlyDigits(v){
+    return /^\d+$/.test(v);
+  }
+
+  // ================== REGISTER ==================
+  async function registerTeknisi(){
+    const nama  = $("nama").value.trim();
+    const email = $("email").value.trim().toLowerCase();
+    const pin   = $("pin").value.trim();
+    const pin2  = $("pin2").value.trim();
+
+    if (!nama || !email || !pin || !pin2){
+      alertMsg("warning","Lengkapi semua kolom.");
+      return;
+    }
+    if (!validEmail(email)){
+      alertMsg("warning","Format email tidak valid.");
+      return;
+    }
+    if (!onlyDigits(pin) || pin.length < 4 || pin.length > 6){
+      alertMsg("warning","PIN harus angka 4–6 digit.");
+      return;
+    }
+    if (pin !== pin2){
+      alertMsg("warning","Konfirmasi PIN tidak sama.");
+      return;
+    }
+
+    setLoading(true);
+    alertMsg("info","Mengirim pendaftaran...");
+
+    try{
+      const payload = new URLSearchParams({
+        mode: "teknisi_register",
+        nama, email, pin
+      });
+
+      const resp = await fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8" },
+        body: payload.toString()
+      });
+
+      let json = null; try{ json = await resp.json(); }catch(e){}
+      if (!json || json.status !== "ok"){
+        const msg = (json && json.message) ? json.message : "Registrasi berhasil menunggu persetujuan admin.";
+        alertMsg("info", msg);
+        setLoading(false);
+        return;
+      }
+
+      alertMsg("success", `Pendaftaran berhasil untuk <strong>${json.nama}</strong>. Silakan login.`);
+      setTimeout(()=> location.href = "loginTeknisi.html", 900);
+
+    }catch(err){
+      console.error(err);
+      alertMsg("danger","Gagal terhubung ke server. Pastikan URL Apps Script benar & Web App sudah di-deploy (Anyone).");
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  // klik tombol & enter
+  $("btnReg").addEventListener("click", registerTeknisi);
+  ["nama","email","pin","pin2"].forEach(id=>{
+    $(id).addEventListener("keydown", e=>{ if (e.key === "Enter") registerTeknisi(); });
+  });
+  </script>
+</body>
+</html>
