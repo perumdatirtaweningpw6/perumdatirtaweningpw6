@@ -49,6 +49,12 @@
     #map:fullscreen { width:100vw; height:100vh; }
     #map:-webkit-full-screen { width:100vw; height:100vh; }
     #map:-ms-fullscreen { width:100vw; height:100vh; }
+    /* Fallback CSS fullscreen (mobile/iOS) */
+    .fs-on .navbar{ display:none !important; }
+    .fs-on .app{ position:fixed; inset:0; height:100vh; width:100vw; z-index:1000; }
+    .fs-on #map{ height:100vh !important; }
+    /* Improve tap target for controls */
+    .leaflet-bar a{ width:34px; height:34px; line-height:34px; text-align:center; font-size:16px; }
 
     .right{ position:relative; background: var(--panel); border-left: 1px solid rgba(255,255,255,.08); display:flex; flex-direction:column; width:420px; transition: width .28s ease, opacity .2s ease; }
 
@@ -525,16 +531,17 @@
 
     baseLayers.light.addTo(map);
 
-    // Fullscreen control (no external plugin)
+    // Fullscreen control (native + CSS fallback for mobile)
     (function(){
       const mapEl = document.getElementById('map');
-      function isFs(){ return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || document.mozFullScreenElement); }
-      function reqFs(el){
-        (el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen || el.mozRequestFullScreen).call(el);
-      }
-      function exitFs(){
-        (document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen || document.mozCancelFullScreen).call(document);
-      }
+      const hasNative = !!(mapEl.requestFullscreen || mapEl.webkitRequestFullscreen || mapEl.msRequestFullscreen || mapEl.mozRequestFullScreen);
+      function isNativeFs(){ return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || document.mozFullScreenElement); }
+      function reqFs(el){ const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen || el.mozRequestFullScreen; return fn && fn.call(el); }
+      function exitFs(){ const fn = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen || document.mozCancelFullScreen; return fn && fn.call(document); }
+      function isCssFs(){ return document.body.classList.contains('fs-on'); }
+      function enterCssFs(){ document.body.classList.add('fs-on'); setTimeout(()=>{ try{ map.invalidateSize(); }catch(_){} }, 60); }
+      function exitCssFs(){ document.body.classList.remove('fs-on'); setTimeout(()=>{ try{ map.invalidateSize(); }catch(_){} }, 60); }
+
       let btnRef = null;
       const FullscreenCtl = L.Control.extend({
         options: { position: 'topright' },
@@ -543,15 +550,16 @@
           const a = L.DomUtil.create('a','',c); a.href='#'; a.title='Layar Penuh'; a.setAttribute('aria-label','Layar Penuh');
           a.innerHTML = '<i class="fas fa-expand"></i>';
           L.DomEvent.on(a,'click',L.DomEvent.stop).on(a,'click',()=>{
-            if (isFs()) exitFs(); else reqFs(mapEl);
+            if (hasNative){ if (isNativeFs()) exitFs(); else reqFs(mapEl); }
+            else { if (isCssFs()) exitCssFs(); else enterCssFs(); }
           });
           btnRef = a; return c;
         }
       });
       const fsCtl = new FullscreenCtl();
       map.addControl(fsCtl);
-      function updateIcon(){ if (!btnRef) return; btnRef.innerHTML = isFs()? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>'; setTimeout(()=>{ try{ map.invalidateSize(); }catch(_){} }, 50); }
-      ['fullscreenchange','webkitfullscreenchange','MSFullscreenChange','mozfullscreenchange'].forEach(ev=>document.addEventListener(ev, updateIcon));
+      function updateIcon(){ if (!btnRef) return; const on = isNativeFs() || isCssFs(); btnRef.innerHTML = on? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>'; setTimeout(()=>{ try{ map.invalidateSize(); }catch(_){} }, 60); }
+      ['fullscreenchange','webkitfullscreenchange','MSFullscreenChange','mozfullscreenchange','orientationchange','resize'].forEach(ev=>document.addEventListener(ev, updateIcon));
     })();
 
     document.getElementById('btnhome').onclick   = () => window.location.href = "index.html";

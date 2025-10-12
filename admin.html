@@ -650,6 +650,30 @@
 
   const safeUrl = u => (typeof u === 'string' && /^https?:\/\//i.test(u)) ? u : '';
 
+  // Fix garbled labels from encoding issues (runtime patch)
+  function fixNavButtons(){
+    const set = (id, html)=>{ const el = document.getElementById(id); if (el) el.innerHTML = html; };
+    set('aduanPrev','&lsaquo;'); set('aduanNext','&rsaquo;');
+    set('tekPrev','&lsaquo;'); set('tekNext','&rsaquo;');
+  }
+
+  // Replace any Google Maps link text with an icon to avoid weird characters
+  function fixMapLinks(){
+    document.querySelectorAll('a[href^="https://www.google.com/maps"]').forEach(a=>{ a.innerHTML = '<i class="fas fa-location-dot"></i>'; });
+  }
+
+  // Normalize photo buttons label (if any garbled text present)
+  function fixPhotoButtons(){
+    document.querySelectorAll('button.open-photo').forEach(btn=>{
+      const idx = Number(btn.getAttribute('data-idx'))||0;
+      try{
+        const r = (window.state && window.state.tek && window.state.tek.data) ? window.state.tek.data[idx] : null;
+        const pc = r ? (Array.from(String(r.foto||'').matchAll(/href\s*=\s*"([^"]+)"/ig)).length || String(r.foto||'').split(/[\s,;\n]+/).filter(Boolean).length) : '';
+        btn.innerHTML = '<i class="fas fa-image me-1"></i>' + 'Lihat Foto' + (pc?(' x'+pc):'');
+      }catch{ btn.innerHTML = '<i class="fas fa-image me-1"></i>Lihat Foto'; }
+    });
+  }
+
   const parseDate = (v)=> {
 
     // Try common formats: "yyyy-mm-dd hh:mm:ss" or "dd/mm/yyyy hh:mm"
@@ -673,6 +697,20 @@
     return 0;
 
   };
+
+  // Format a date/time value to Asia/Jakarta (WIB)
+  function fmtWIB(v){
+    try{
+      let ms = 0;
+      if (typeof v === 'number') { ms = v; }
+      else { ms = parseDate(v); if (!ms && v) { const d=new Date(String(v)); if(!isNaN(d)) ms=d.getTime(); } }
+      if (!ms) return v || '';
+      const d = new Date(ms);
+      const parts = new Intl.DateTimeFormat('id-ID', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false, timeZone:'Asia/Jakarta' }).formatToParts(d).reduce((a,p)=>{ a[p.type]=p.value; return a; },{});
+      const pad = s => String(s).padStart(2,'0');
+      return `${parts.year}-${pad(parts.month)}-${pad(parts.day)} ${pad(parts.hour)}:${pad(parts.minute)} WIB`;
+    }catch{ return v || ''; }
+  }
 
 
 
@@ -1114,7 +1152,7 @@
 
         <td><strong>${r.tiket||''}</strong></td>
 
-        <td>${r.tanggal||''}</td>
+        <td>${fmtWIB(r.tanggal)||''}</td>
 
         <td>${r.nama||''}<br><small class="text-secondary">${r.nopel||''}</small></td>
 
@@ -1202,7 +1240,7 @@
 
         <td>${r.teknisi||'-'}<br><small class="text-secondary">${r.tim||''}</small></td>
 
-        <td>${r.waktu||''}</td>
+        <td>${fmtWIB(r.waktu||r.ts)||''}</td>
 
         <td>${r.catatan||''}</td>
 
@@ -1243,6 +1281,10 @@
     });
 
   }
+
+  // Wrap renderers to apply post-fix for garbled labels/icons
+  const __renderAduan = renderAduan; renderAduan = function(){ __renderAduan(); try{ fixMapLinks(); }catch{} };
+  const __renderTek   = renderTek;   renderTek   = function(){ __renderTek();   try{ fixMapLinks(); fixPhotoButtons(); }catch{} };
 
   function openDetail(item, focusPhotos=false){
 
@@ -1681,6 +1723,9 @@
   (async function init(){
 
     try{
+
+      // Fix pagination labels immediately
+      try{ fixNavButtons(); }catch{}
 
       await Promise.all([loadAduan(), loadTek(), loadUsers()]);
 
