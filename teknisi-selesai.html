@@ -121,13 +121,21 @@
               <div class="col-12">
                 <label class="form-label mb-1">Dokumentasi Sebelum Pekerjaan</label>
                 <input id="fotoSebelum" type="file" accept="image/*" class="form-control">
-                <small class="text-secondary">Bisa pilih dari Galeri atau ambil dari Kamera.</small>
+                <div class="mt-2 d-flex flex-wrap gap-2">
+                  <button type="button" class="btn btn-sm btn-outline-info picker" data-for="fotoSebelum" data-mode="camera"><i class="fas fa-camera me-1"></i>Ambil dari Kamera</button>
+                  <button type="button" class="btn btn-sm btn-outline-light picker" data-for="fotoSebelum" data-mode="gallery"><i class="fas fa-image me-1"></i>Pilih dari Galeri</button>
+                </div>
+                <small class="text-secondary d-block mt-1">Pilih dari Galeri atau ambil langsung dari Kamera.</small>
                 <div class="mt-2" id="previewSebelum"></div>
               </div>
               <div class="col-12">
                 <label class="form-label mb-1">Dokumentasi Sesudah Pekerjaan</label>
                 <input id="fotoSesudah" type="file" accept="image/*" class="form-control">
-                <small class="text-secondary">Bisa pilih dari Galeri atau ambil dari Kamera.</small>
+                <div class="mt-2 d-flex flex-wrap gap-2">
+                  <button type="button" class="btn btn-sm btn-outline-info picker" data-for="fotoSesudah" data-mode="camera"><i class="fas fa-camera me-1"></i>Ambil dari Kamera</button>
+                  <button type="button" class="btn btn-sm btn-outline-light picker" data-for="fotoSesudah" data-mode="gallery"><i class="fas fa-image me-1"></i>Pilih dari Galeri</button>
+                </div>
+                <small class="text-secondary d-block mt-1">Pilih dari Galeri atau ambil langsung dari Kamera.</small>
                 <div class="mt-2" id="previewSesudah"></div>
               </div>
             </div>
@@ -217,6 +225,25 @@ const TEKNISI_ENDPOINT = GAS_URL; // WAJIB: aktifkan kirim ke DataTeknisi
     }
     setupPreview(fotoSebelum, previewSebelum, 'Preview sebelum pekerjaan');
     setupPreview(fotoSesudah, previewSesudah, 'Preview sesudah pekerjaan');
+
+    // ====== Camera/Gallery pickers ======
+    document.querySelectorAll('button.picker[data-for][data-mode]').forEach(btn=>{
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-for');
+        const mode = btn.getAttribute('data-mode');
+        const inp = document.getElementById(id);
+        if (!inp) return;
+        try{
+          if (mode === 'camera') inp.setAttribute('capture','environment'); else inp.removeAttribute('capture');
+          inp.click();
+        }catch{}
+      });
+    });
+    // After selection, remove capture to avoid forcing camera next time unintentionally
+    ['fotoSebelum','fotoSesudah'].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('change', ()=>{ el.removeAttribute('capture'); });
+    });
 
     // ====== Leaflet Map (lazy init + toggle) ======
     let map=null, marker=null;
