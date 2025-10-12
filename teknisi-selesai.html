@@ -16,24 +16,63 @@
     .navbar-brand { color: var(--brand) !important; font-weight: 700; }
     .card { background: var(--panel); border: none; border-radius: 16px; color: #fff; }
     .card-header { background: var(--panel-soft); color: var(--ink); border-bottom: 1px solid rgba(255,255,255,.08); }
-    .form-control, .form-select { background: rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.15); }
-    .form-control::placeholder { color:#cfeaff; opacity:.6; }
+    .form-control, .form-select { background: rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.2); }
+    /* Force visible text color in all inputs (Chrome/Edge WebKit fix) */
+    .form-control, .form-select, textarea.form-control {
+      color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; caret-color:#ffffff;
+    }
+    /* Keep dark background while focused so white text stays visible */
+    .form-control:focus, .form-select:focus { background: rgba(255,255,255,.12); border-color:#64c2ff; box-shadow: 0 0 0 .1rem rgba(100,194,255,.25); color:#fff; -webkit-text-fill-color:#fff; }
+    .form-control::placeholder, textarea.form-control::placeholder { color:#cfeaff; opacity:.85; }
+    /* Autofill background/text fix (Chrome) */
+    input.form-control:-webkit-autofill,
+    textarea.form-control:-webkit-autofill,
+    select.form-select:-webkit-autofill {
+      -webkit-text-fill-color:#ffffff !important;
+      caret-color:#ffffff;
+      transition: background-color 50000s ease-in-out 0s;
+      box-shadow: inset 0 0 0 1000px rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.25);
+    }
+    /* Disabled/read-only states - keep text visible on dark bg */
+    .form-control:disabled, .form-control[readonly], .form-select:disabled { background: rgba(255,255,255,.12); color:#ffffff; opacity:1; border-color: rgba(255,255,255,.25); -webkit-text-fill-color:#ffffff; }
+    /* Select dropdown items on dark theme */
+    .form-select option { background:#0f284d; color:#fff; }
+    .form-select { color:#fff; }
+    /* File input button & text */
+    input[type="file"].form-control { color:#cfeaff; }
+    input[type="file"].form-control::file-selector-button { background: var(--brand); color:#07263f; border: none; padding: .375rem .75rem; margin-right:.5rem; }
+    /* Hint to browsers to render native controls in dark scheme */
+    :root { color-scheme: dark; }
     .btn-brand { background: var(--brand); color:#07263f; border:none; }
     a { color: var(--ink); }
     footer { text-align:center; color:#aaa; font-size:.9rem; padding:16px 0; border-top:1px solid rgba(255,255,255,.1); margin-top:24px; }
     #map-tek { height: 340px; border-radius: 12px; }
     .thumb { max-width: 100%; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); }
+    /* Mobile layout tweaks */
+    @media (max-width: 576px){
+      #map-tek{ height: 260px; }
+      .card{ border-radius: 12px; }
+      .btn{ font-size: 14px; }
+      .form-control, .form-select{ font-size: 14px; }
+      .d-flex.gap-2 > .btn{ flex:1 1 auto; }
+      .navbar .btn{ padding: 4px 10px; }
+    }
+    /* Toast placement */
+    #toastWrap { position: fixed; top: 12px; right: 12px; z-index: 1080; display:flex; flex-direction:column; gap:8px; }
+    .toast.text-bg-success, .toast.text-bg-danger, .toast.text-bg-info, .toast.text-bg-warning { box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+    @media (max-width: 576px){
+      #toastWrap{ top: auto; bottom: 12px; right: 50%; transform: translateX(50%); }
+    }
   </style>
 </head>
 <body>
   <nav class="navbar navbar-dark px-3">
-  <a class="navbar-brand" href="index.html">
+    <a class="navbar-brand" href="index.html">
       <img src="https://perumdatirtawening.co.id/asset/image/logo-horizon-kecils.gif" height="42" class="me-2" alt="Logo"/>
-      Modul Teknisi
     </a>
-    <div class="ms-auto d-flex gap-2">
-      <a class="btn btn-sm btn-outline-info" href="admin-daftar-aduan.html">Daftar Aduan</a>
-      <a class="btn btn-sm btn-outline-light" href="admin-login.html">Login Admin</a>
+    <div class="ms-auto">
+      <a class="btn btn-sm btn-outline-light" href="index.html"><i class="fas fa-house me-1"></i>Halaman Utama</a>
     </div>
   </nav>
 
@@ -51,7 +90,10 @@
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">Nomor Tiket</label>
-                <input id="tiket" class="form-control" placeholder="TKT-xxxxxx">
+                <select id="tiket" class="form-select">
+                  <option value="">Pilih tiket dari daftar</option>
+                </select>
+                <small class="text-secondary">Menampilkan maks. 5 tiket terbaru (tanpa status/Baru), menyembunyikan yang berstatus Proses/Selesai.</small>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Tanggal & Waktu Selesai</label>
@@ -119,12 +161,15 @@
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     // ====== KONFIG ENDPOINT ======
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyfSbzjl6j6Ctd3YkOFnjtEId5Ouhc-Wfm6J2zDudogCAVyLQZjZgthBzw42S-bjxWNBw/exec";
+    const GAS_URL = localStorage.getItem('cfg_gas') || "https://script.google.com/macros/s/AKfycbyfSbzjl6j6Ctd3YkOFnjtEId5Ouhc-Wfm6J2zDudogCAVyLQZjZgthBzw42S-bjxWNBw/exec";
 const TEKNISI_ENDPOINT = GAS_URL; // WAJIB: aktifkan kirim ke DataTeknisi
 
     // ====== Helper UI ======
     const alertBox = document.getElementById('alertBox');
-    function alertMsg(type, html) { alertBox.innerHTML = '<div class="alert alert-'+type+'">'+html+'</div>'; }
+    function ensureToastWrap(){ let w=document.getElementById('toastWrap'); if(!w){ w=document.createElement('div'); w.id='toastWrap'; document.body.appendChild(w);} return w; }
+    function mapToastType(t){ t=String(t||'').toLowerCase(); return ({success:'success', danger:'danger', warning:'warning', info:'info'})[t]||'secondary'; }
+    function showToast(type, msg){ const wrap=ensureToastWrap(); const el=document.createElement('div'); el.className='toast align-items-center text-bg-'+mapToastType(type)+' border-0'; el.setAttribute('role','alert'); el.setAttribute('aria-live','assertive'); el.setAttribute('aria-atomic','true'); el.innerHTML = '<div class="d-flex"><div class="toast-body"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Tutup"></button></div>'; el.querySelector('.toast-body').textContent = msg; wrap.appendChild(el); const t=new bootstrap.Toast(el,{delay:3000}); t.show(); el.addEventListener('hidden.bs.toast', ()=> el.remove()); }
+    function alertMsg(type, html) { alertBox.innerHTML = '<div class="alert alert-'+type+'">'+html+'</div>'; const plain = html.replace(/<[^>]*>/g,''); showToast(type, plain); }
     const btnKirim = document.getElementById('btnKirim');
     const btnSpin  = btnKirim.querySelector('.spinner-border');
     const btnText  = btnKirim.querySelector('.btn-text');
@@ -134,6 +179,12 @@ const TEKNISI_ENDPOINT = GAS_URL; // WAJIB: aktifkan kirim ke DataTeknisi
     const waktu = document.getElementById('waktu');
     function setWaktuNow(){ const d=new Date(); const pad=n=>String(n).padStart(2,'0'); waktu.value = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+' WIB'; }
     setWaktuNow();
+    // Prefill nama teknisi dari login bila ada
+    const namaLogin = localStorage.getItem('teknisi_nama');
+    const emailLogin = localStorage.getItem('teknisi_email');
+    if (namaLogin && !document.getElementById('teknisi').value) {
+      document.getElementById('teknisi').value = namaLogin;
+    }
 
     // ====== Preview foto ======
     const foto = document.getElementById('foto');
@@ -172,24 +223,36 @@ const TEKNISI_ENDPOINT = GAS_URL; // WAJIB: aktifkan kirim ke DataTeknisi
       const la=elLat.value.trim(), lo=elLng.value.trim();
       const lokasi=(la&&lo)?(la+','+lo):'';
       if(!tiket){ alertMsg('warning','Nomor tiket wajib diisi.'); return; }
+      // Validasi wajib koordinat + foto dokumentasi
+      const latNum = parseFloat(la), lngNum = parseFloat(lo);
+      const fotoInput = document.getElementById('foto');
+      const fotoFile = fotoInput.files[0];
+      if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)){
+        alertMsg('warning','Koordinat lokasi wajib diisi. Gunakan tombol "Pakai Lokasi Saya" atau klik peta.');
+        return;
+      }
+      if (!fotoFile){
+        alertMsg('warning','Foto dokumentasi wajib diunggah.');
+        return;
+      }
 
       setLoading(true); alertMsg('info','Mengirim...');
       try{
-        // 1) wajib: update status selesai (triger notif)
-        const respUpd = await fetch(GAS_URL+'?mode=update&tiket='+encodeURIComponent(tiket)+'&status='+encodeURIComponent('Selesai'));
+        // 1) update status ke Proses (menunggu verifikasi admin)
+        const respUpd = await fetch(GAS_URL+'?mode=update&tiket='+encodeURIComponent(tiket)+'&status='+encodeURIComponent('Proses'));
         const jUpd = await respUpd.json();
         if (jUpd.status!=='success'){ setLoading(false); return alertMsg('danger','Gagal update status tiket.'); }
 
         // 2) opsional: kirim detail teknisi jika endpoint ada
         if (TEKNISI_ENDPOINT){
-          const dokumentasi = await toDataURL(document.getElementById('foto').files[0]);
+          const dokumentasi = await toDataURL(fotoFile);
           const payload = new URLSearchParams({ mode:'teknisi_selesai', tiket, teknisi, tim, catatan, lokasi, waktu:waktu.value, dokumentasi });
           await fetch(TEKNISI_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body: payload.toString() });
         }
 
-        alertMsg('success','Tiket <strong>'+tiket+'</strong> ditandai <strong>Selesai</strong>. Data teknisi tersimpan.');
+        alertMsg('success','Tiket <strong>'+tiket+'</strong> ditandai <strong>Proses</strong> (menunggu verifikasi admin). Data teknisi tersimpan. Menyegarkan halaman...');
         resetForm();
-        setTimeout(()=> alertBox.innerHTML='', 4000);
+        setTimeout(()=>{ location.reload(); }, 1200);
       }catch(err){
         console.error(err);
         alertMsg('danger','Gagal mengirim. Cek koneksi & endpoint.');
@@ -201,9 +264,55 @@ const TEKNISI_ENDPOINT = GAS_URL; // WAJIB: aktifkan kirim ke DataTeknisi
     document.getElementById('btnKirim').addEventListener('click', submitTeknisi);
     document.getElementById('btnReset').addEventListener('click', resetForm);
 
-    // Prefill tiket dari query
-    const tk = new URLSearchParams(location.search).get('tiket');
-    if (tk) document.getElementById('tiket').value = tk;
+    // Muat daftar tiket (Baru/Proses) → opsi pilihan
+    async function loadTickets() {
+      const sel = document.getElementById('tiket');
+      sel.innerHTML = '<option value="">Memuat daftar...</option>';
+      try {
+        const resp = await fetch(GAS_URL + '?mode=aduan');
+        const list = await resp.json();
+        // petakan minimal field + tanggal untuk sorting
+        const rows = (Array.isArray(list) ? list : (list.data||[])).map(o=>({
+          tiket: o["Tiket"],
+          status: o["Status"],
+          nama: o["Nama Pelanggan"],
+          alamat: o["Alamat"],
+          tanggal: o["Tanggal"]
+        }));
+        // helper parse tanggal sederhana
+        const parseDate = (v)=>{
+          if(!v) return 0; const s=String(v).trim(); const d=new Date(s); if(!isNaN(d)) return d.getTime();
+          const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return new Date(`${m[1]}-${m[2]}-${m[3]}`).getTime();
+          const m2=s.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})/); if(m2) return new Date(`${m2[3]}-${m2[2]}-${m2[1]}`).getTime();
+          return 0;
+        };
+        // filter hanya tiket tanpa status/Baru
+        const eligible = rows.filter(r => {
+          if (!r.tiket) return false;
+          const s = String(r.status||'').trim().toLowerCase();
+          return s === '' || s === 'baru';
+        });
+        eligible.sort((a,b)=> parseDate(b.tanggal) - parseDate(a.tanggal));
+        const limited = eligible.slice(0,5);
+        const options = limited.map(r => ({ value: r.tiket, label: r.tiket + (r.nama?(' - '+r.nama):'') }));
+        sel.innerHTML = '<option value="">Pilih tiket dari daftar</option>' +
+          options.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+
+        // Prefill dari query bila ada
+        const tk = new URLSearchParams(location.search).get('tiket');
+        if (tk) {
+          // jika tk tidak ada di options, tambahkan sementara agar bisa terpilih
+          if (![...sel.options].some(op => op.value===tk)) {
+            const opt = document.createElement('option'); opt.value=tk; opt.textContent=tk+' (manual)'; sel.appendChild(opt);
+          }
+          sel.value = tk;
+        }
+      } catch (e) {
+        sel.innerHTML = '<option value="">Gagal memuat daftar tiket</option>';
+      }
+    }
+
+    loadTickets();
   });
   </script>
 </body>

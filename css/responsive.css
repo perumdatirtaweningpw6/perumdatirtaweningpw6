@@ -1,0 +1,32 @@
+/* Mobile-first tweaks that do NOT alter desktop */
+@media (max-width: 576px) {
+  /* Navbar */
+  .navbar { padding-inline: 10px; }
+  .navbar-brand img { height: 36px !important; }
+
+  /* Containers */
+  .container, .container-fluid { padding-left: 12px; padding-right: 12px; }
+
+  /* Typography */
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.4rem; }
+  h3 { font-size: 1.2rem; }
+
+  /* Cards and panels */
+  .card, .card-soft { border-radius: 12px !important; }
+
+  /* Forms & buttons */
+  .form-control, .form-select, .btn { font-size: 14px !important; }
+  .btn { padding: 8px 12px; }
+  .btn-group > .btn { flex: 1 1 auto; }
+
+  /* Tables: horizontal scroll if overflow */
+  table.table { display: block; overflow-x: auto; white-space: nowrap; }
+
+  /* Maps */
+  #map, #map-tek { height: 60vh; }
+
+  /* Footer */
+  footer { font-size: 0.85rem; }
+}
+

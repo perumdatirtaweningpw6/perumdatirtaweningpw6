@@ -48,7 +48,7 @@
     a { color: var(--ink); text-decoration:none; }
     a:hover { text-decoration:underline; }
   </style>
-</head>
+  <link rel="stylesheet" href="css/responsive.css" />`n</head>
 <body>
   <div class="container px-3">
     <div class="row justify-content-center">
@@ -67,8 +67,9 @@
             <input type="password" id="pin" class="form-control" maxlength="6" placeholder="Masukkan PIN" required>
           </div>
 
-          <button id="btnLogin" class="btn btn-brand w-100 mt-2">
-            <i class="fas fa-right-to-bracket me-2"></i>Masuk
+          <button id="btnLogin" class="btn btn-brand w-100 mt-2" type="button">
+            <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+            <span class="btn-text"><i class="fas fa-right-to-bracket me-2"></i>Masuk</span>
           </button>
           <div id="msg" class="small text-warning mt-3 fw-semibold"></div>
 
@@ -91,7 +92,22 @@
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbwMLCYvMZIM9uMuZlzqsnhroINTh8gcLr9fQcbQLTTP4LcqzBSO50hFJCfAFncBNnW5Bw/exec";
 
-    document.getElementById("btnLogin").addEventListener("click", async () => {
+    const btnLogin = document.getElementById("btnLogin");
+    const spinner = btnLogin.querySelector(".spinner-border");
+    const btnText = btnLogin.querySelector(".btn-text");
+
+    function setLoading(isLoading){
+      btnLogin.disabled = isLoading;
+      if (isLoading) {
+        spinner.classList.remove("d-none");
+        btnText.innerHTML = '<i class="fas fa-right-to-bracket me-2"></i>Masuk...';
+      } else {
+        spinner.classList.add("d-none");
+        btnText.innerHTML = '<i class="fas fa-right-to-bracket me-2"></i>Masuk';
+      }
+    }
+
+    async function doLogin(){
       const email = document.getElementById("email").value.trim();
       const pin   = document.getElementById("pin").value.trim();
       const msgEl = document.getElementById("msg");
@@ -103,6 +119,8 @@
         return;
       }
 
+      setLoading(true);
+      msgEl.textContent = "Memproses login...";
       try {
         const params = new URLSearchParams({ mode: "teknisi_auth", email, pin });
         const res = await fetch(GAS_URL, { method: "POST", body: params });
@@ -111,13 +129,29 @@
         if (result.status === "ok") {
           localStorage.setItem("teknisi_email", result.email);
           localStorage.setItem("teknisi_nama", result.nama);
-          window.location.href = "dashboard-teknisi.html";
+          window.location.href = "teknisi-selesai.html";
         } else {
           msgEl.textContent = result.message || "Login gagal.";
         }
       } catch (err) {
         msgEl.textContent = "Terjadi kesalahan koneksi.";
+      } finally {
+        setLoading(false);
       }
+    }
+
+    // Click handler
+    btnLogin.addEventListener("click", doLogin);
+
+    // Enter-to-submit on inputs
+    ["email","pin"].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          doLogin();
+        }
+      });
     });
   </script>
 </body>
