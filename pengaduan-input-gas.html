@@ -50,6 +50,20 @@
 
     #map { width: 100%; height: 340px; border-radius: 12px; }
 
+    /* Image preview */
+    .thumb { max-width: 220px; width: 100%; height: auto; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); display:block; }
+    @media (max-width: 576px){ .thumb{ max-width: 140px; } }
+
+    /* Map toggle & modal (mobile: prefer modal fullscreen) */
+    #btnToggleMap{ display:none; }
+    #btnOpenMapModal{ display:none; }
+    #mapWrap{ display:block; }
+    @media (max-width: 576px){
+      #btnOpenMapModal{ display:inline-block; }
+      #btnToggleMap{ display:none !important; }
+      #mapWrap{ display:none !important; }
+    }
+
   </style>
 
   <link rel="stylesheet" href="css/responsive.css" />
@@ -180,13 +194,16 @@
               </div>
 
               <div class="col-12">
-
-                <label class="form-label">Lampiran Foto (opsional)</label>
-
-                <input id="foto" type="file" accept="image/*" class="form-control">
-
-                <small class="text-secondary">Foto akan di-upload ke Drive lewat Apps Script.</small>
-
+                <label class="form-label mb-1">Foto (opsional)</label>
+                <input id="fotoSebelum" type="file" accept="image/*" capture="environment" class="form-control">
+                <small class="text-secondary">Ambil foto kondisi kerusakan.</small>
+                <div class="mt-2" id="previewSebelum"></div>
+              </div>
+              <div class="col-12">
+                <label class="form-label mb-1">Foto (opsional)</label>
+                <input id="fotoSesudah" type="file" accept="image/*" capture="environment" class="form-control">
+                <small class="text-secondary">Ambil foto kondisi kerusakan.</small>
+                <div class="mt-2" id="previewSesudah"></div>
               </div>
 
             </div>
@@ -221,7 +238,17 @@
 
   <div class="card-body">
 
-    <div id="map-aduan" style="height: 350px; border-radius: 10px;"></div>
+    <div class="d-flex gap-2 mb-2">
+      <button id="btnToggleMap" class="btn btn-outline-info btn-sm" type="button">
+        <i class="fas fa-map-location-dot me-2"></i>Tampilkan Peta
+      </button>
+      <button id="btnOpenMapModal" class="btn btn-info btn-sm d-sm-none" type="button">
+        <i class="fas fa-location-dot me-2"></i>Pilih Lokasi (Fullscreen)
+      </button>
+    </div>
+    <div id="mapWrap">
+      <div id="map-aduan" style="height: 350px; border-radius: 10px;"></div>
+    </div>
 
 
 
@@ -290,6 +317,25 @@
   <footer class="mt-4 text-center text-secondary">© 2025 PDAM Wilayah6 . All rights reserved.</footer>
 
 
+
+  <!-- Map Picker Modal (fullscreen on small screens) -->
+  <div class="modal fade modal-fullscreen-sm-down" id="mapModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="background: rgba(16,40,78,.96); color:#e6f3ff;">
+        <div class="modal-header border-0">
+          <h5 class="modal-title"><i class="fas fa-location-dot me-2"></i>Pilih Lokasi</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body pt-0">
+          <div id="map-aduan-modal" style="height: 70vh; border-radius: 12px;"></div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <button class="btn btn-success" id="btnGeoModal" type="button"><i class="fas fa-location-arrow me-2"></i>Pakai Lokasi Saya</button>
+            <button class="btn btn-primary ms-auto" id="btnSaveModal" type="button"><i class="fas fa-check me-2"></i>Simpan Lokasi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -455,111 +501,132 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-  // ====== MAP: gunakan #map-aduan saja ======
+  // ====== MAP (lazy init + toggle) ======
+  let map = null, marker = null;
+  const elLat = document.getElementById('lat-aduan');
+  const elLng = document.getElementById('lng-aduan');
+  const mapWrap = document.getElementById('mapWrap');
+  const btnToggleMap = document.getElementById('btnToggleMap');
+  const isMobile = window.matchMedia('(max-width: 576px)').matches;
 
-  if (typeof L === 'undefined') {
-
-    console.error('Leaflet belum termuat. Cek CDN.');
-
-  } else {
-
-    const map = L.map('map-aduan', { zoomControl: true, preferCanvas: true })
-
-      .setView([-6.9147, 107.6098], 12);
-
-
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19})
-
-      .addTo(map);
-
-
-
-    let marker = null;
-
-    const elLat = document.getElementById('lat-aduan');
-
-    const elLng = document.getElementById('lng-aduan');
-
-
-
-    function setPoint(lat, lng, zoomTo = true) {
-
-      const pos = [lat, lng];
-
-      if (!marker) marker = L.marker(pos).addTo(map);
-
-      else marker.setLatLng(pos);
-
-      if (elLat) elLat.value = Number(lat).toFixed(6);
-
-      if (elLng) elLng.value = Number(lng).toFixed(6);
-
-      if (zoomTo) map.setView(pos, Math.max(map.getZoom(), 16));
-
-    }
-
-
-
+  function initMap(){
+    if (map || typeof L==='undefined') return;
+    map = L.map('map-aduan', { zoomControl: true, preferCanvas: true }).setView([-6.9147, 107.6098], 12);
+    const providers=[
+      {u:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',o:{maxZoom:19}},
+      {u:'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',o:{maxZoom:20}}
+    ];
+    let tl=L.tileLayer(providers[0].u,providers[0].o).addTo(map);
+    tl.on('tileerror',()=>{ try{ map.removeLayer(tl); }catch(_){} tl=L.tileLayer(providers[1].u,providers[1].o).addTo(map); });
     map.on('click', (e) => setPoint(e.latlng.lat, e.latlng.lng, false));
+    setTimeout(()=>{ try{ map.invalidateSize(); }catch(_){} }, 0);
+  }
 
+  function setPoint(lat, lng, zoomTo = true){
+    const pos=[lat,lng];
+    if (elLat) elLat.value = Number(lat).toFixed(6);
+    if (elLng) elLng.value = Number(lng).toFixed(6);
+    if (!map) return;
+    if (!marker) marker = L.marker(pos).addTo(map); else marker.setLatLng(pos);
+    if (zoomTo) map.setView(pos, Math.max(map.getZoom(), 16));
+  }
 
+  function showMap(){ if (mapWrap){ mapWrap.style.display='block'; } if(btnToggleMap){ btnToggleMap.innerHTML='<i class="fas fa-eye-slash me-2"></i>Sembunyikan Peta'; } if (!map) initMap(); else setTimeout(()=>{ try{ map.invalidateSize(); }catch(_){} },0); }
+  function hideMap(){ if (mapWrap){ mapWrap.style.display='none'; } if(btnToggleMap){ btnToggleMap.innerHTML='<i class=\"fas fa-map-location-dot me-2\"></i>Tampilkan Peta'; } }
 
-    // tombol-tombol lokasi (kalau ada)
+  if (btnToggleMap){ btnToggleMap.addEventListener('click', ()=>{ const hidden = mapWrap && getComputedStyle(mapWrap).display==='none'; if (hidden) showMap(); else hideMap(); }); }
 
-    const btnSet = document.getElementById('btn-set-aduan');
+  if (!isMobile && typeof L!=='undefined') { initMap(); }
 
-    const btnReset = document.getElementById('btn-reset-aduan');
+  // tombol-tombol lokasi
+  const btnSet = document.getElementById('btn-set-aduan');
+  const btnReset = document.getElementById('btn-reset-aduan');
+  const btnGeo = document.getElementById('btn-geo-aduan');
 
-    const btnGeo = document.getElementById('btn-geo-aduan');
+  if (btnSet) btnSet.addEventListener('click', () => {
+    if (isMobile) showMap();
+    if (!map) initMap();
+    const lat = parseFloat(elLat.value);
+    const lng = parseFloat(elLng.value);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return alert('Isi latitude & longitude valid.');
+    setPoint(lat, lng, true);
+  });
 
+  if (btnReset) btnReset.addEventListener('click', () => {
+    if (elLat) elLat.value = ''; if (elLng) elLng.value = '';
+    if (marker && map) { map.removeLayer(marker); marker = null; }
+    if (map) map.setView([-6.9147, 107.6098], 12);
+  });
 
+  if (btnGeo) btnGeo.addEventListener('click', () => {
+    if (isMobile) showMap();
+    if (!navigator.geolocation) return alert('Geolocation tidak didukung browser.');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { if (!map) initMap(); setPoint(pos.coords.latitude, pos.coords.longitude, true); },
+      (err) => { console.error(err); alert('Gagal ambil lokasi. Aktifkan izin lokasi.'); },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    );
+  });
 
-    if (btnSet) btnSet.addEventListener('click', () => {
+  // ====== Map Modal (fullscreen on mobile) ======
+  const mapModalEl = document.getElementById('mapModal');
+  const btnOpenMapModal = document.getElementById('btnOpenMapModal');
+  let modalMap = null, modalMarker = null;
 
-      const lat = parseFloat(elLat.value);
-
-      const lng = parseFloat(elLng.value);
-
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return alert('Isi latitude & longitude valid.');
-
-      setPoint(lat, lng, true);
-
+  function initModalMap(){
+    if (modalMap || typeof L==='undefined') return;
+    modalMap = L.map('map-aduan-modal', { zoomControl:true, preferCanvas:true }).setView([-6.9147, 107.6098], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(modalMap);
+    modalMap.on('click', (e)=> setPointModal(e.latlng.lat, e.latlng.lng, false));
+  }
+  function setPointModal(lat, lng, zoomTo=true){
+    const pos=[lat,lng];
+    if (!modalMap) return;
+    if (!modalMarker) modalMarker = L.marker(pos).addTo(modalMap); else modalMarker.setLatLng(pos);
+    if (zoomTo) modalMap.setView(pos, Math.max(modalMap.getZoom(),16));
+  }
+  function syncInputsFromModal(){
+    if (!modalMarker) return;
+    const pos = modalMarker.getLatLng();
+    if (elLat) elLat.value = Number(pos.lat).toFixed(6);
+    if (elLng) elLng.value = Number(pos.lng).toFixed(6);
+  }
+  if (btnOpenMapModal && mapModalEl){
+    const bsModal = new bootstrap.Modal(mapModalEl);
+    btnOpenMapModal.addEventListener('click', ()=>{ bsModal.show(); });
+    mapModalEl.addEventListener('shown.bs.modal', ()=>{
+      initModalMap();
+      setTimeout(()=>{ try{ modalMap.invalidateSize(); }catch(_){} }, 0);
+      const la=parseFloat(elLat?.value), lo=parseFloat(elLng?.value);
+      if (Number.isFinite(la) && Number.isFinite(lo)) setPointModal(la,lo,true);
     });
-
-
-
-    if (btnReset) btnReset.addEventListener('click', () => {
-
-      elLat.value = ''; elLng.value = '';
-
-      if (marker) { map.removeLayer(marker); marker = null; }
-
-      map.setView([-6.9147, 107.6098], 12);
-
-    });
-
-
-
-    if (btnGeo) btnGeo.addEventListener('click', () => {
-
+    document.getElementById('btnGeoModal')?.addEventListener('click', ()=>{
       if (!navigator.geolocation) return alert('Geolocation tidak didukung browser.');
-
-      navigator.geolocation.getCurrentPosition(
-
-        (pos) => setPoint(pos.coords.latitude, pos.coords.longitude, true),
-
-        (err) => { console.error(err); alert('Gagal ambil lokasi. Aktifkan izin lokasi.'); },
-
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-
-      );
-
+      navigator.geolocation.getCurrentPosition((pos)=>{
+        initModalMap(); setPointModal(pos.coords.latitude, pos.coords.longitude, true);
+      }, (err)=>{ console.error(err); alert('Gagal ambil lokasi. Aktifkan izin lokasi.'); }, {enableHighAccuracy:true, timeout:8000, maximumAge:0});
     });
-
+    document.getElementById('btnSaveModal')?.addEventListener('click', ()=>{ syncInputsFromModal(); bsModal.hide(); });
   }
 
 
+
+  // ====== Preview foto (sebelum & sesudah) ======
+  const fotoSebelum = document.getElementById('fotoSebelum');
+  const fotoSesudah = document.getElementById('fotoSesudah');
+  const previewSebelum = document.getElementById('previewSebelum');
+  const previewSesudah = document.getElementById('previewSesudah');
+
+  function setupPreview(input, previewBox, alt){
+    if (!input || !previewBox) return;
+    input.addEventListener('change', ()=>{
+      previewBox.innerHTML=''; const f=input.files[0]; if(!f) return;
+      const img=document.createElement('img'); img.className='thumb mt-2'; img.alt=alt;
+      const r=new FileReader(); r.onload=()=>img.src=r.result; r.readAsDataURL(f); previewBox.appendChild(img);
+    });
+  }
+  setupPreview(fotoSebelum, previewSebelum, 'Preview sebelum pekerjaan');
+  setupPreview(fotoSesudah, previewSesudah, 'Preview sesudah pekerjaan');
 
   // ====== Utils ======
 
@@ -633,9 +700,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    const fotoFile = document.getElementById('foto').files[0];
-
-    const dokumentasi = await toDataURL(fotoFile); // "" jika kosong
+    const fileSebelum = (fotoSebelum && fotoSebelum.files[0]) || null;
+    const fileSesudah = (fotoSesudah && fotoSesudah.files[0]) || null;
+    const dokumentasi_sebelum = await toDataURL(fileSebelum); // "" jika kosong
+    const dokumentasi_sesudah = await toDataURL(fileSesudah); // "" jika kosong
 
 
 
@@ -655,9 +723,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       lokasi: lokasi,
 
-      dokumentasi: dokumentasi
+      // Backward-compat: gunakan 'dokumentasi' = sesudah
+      dokumentasi: dokumentasi_sesudah
 
     });
+
+    // Tambahan field eksplisit
+    if (dokumentasi_sebelum) payload.append('dokumentasi_sebelum', dokumentasi_sebelum);
+    if (dokumentasi_sesudah) payload.append('dokumentasi_sesudah', dokumentasi_sesudah);
 
 
 

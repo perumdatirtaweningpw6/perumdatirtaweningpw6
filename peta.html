@@ -45,6 +45,10 @@
     .app{ position:relative; display:grid; grid-template-columns: 1fr auto; height: calc(100vh - 64px); }
 
     #map{ width:100%; height:100%; }
+    /* Fullscreen adjustments */
+    #map:fullscreen { width:100vw; height:100vh; }
+    #map:-webkit-full-screen { width:100vw; height:100vh; }
+    #map:-ms-fullscreen { width:100vw; height:100vh; }
 
     .right{ position:relative; background: var(--panel); border-left: 1px solid rgba(255,255,255,.08); display:flex; flex-direction:column; width:420px; transition: width .28s ease, opacity .2s ease; }
 
@@ -520,6 +524,35 @@
     };
 
     baseLayers.light.addTo(map);
+
+    // Fullscreen control (no external plugin)
+    (function(){
+      const mapEl = document.getElementById('map');
+      function isFs(){ return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || document.mozFullScreenElement); }
+      function reqFs(el){
+        (el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen || el.mozRequestFullScreen).call(el);
+      }
+      function exitFs(){
+        (document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen || document.mozCancelFullScreen).call(document);
+      }
+      let btnRef = null;
+      const FullscreenCtl = L.Control.extend({
+        options: { position: 'topright' },
+        onAdd: function(){
+          const c = L.DomUtil.create('div','leaflet-bar leaflet-control');
+          const a = L.DomUtil.create('a','',c); a.href='#'; a.title='Layar Penuh'; a.setAttribute('aria-label','Layar Penuh');
+          a.innerHTML = '<i class="fas fa-expand"></i>';
+          L.DomEvent.on(a,'click',L.DomEvent.stop).on(a,'click',()=>{
+            if (isFs()) exitFs(); else reqFs(mapEl);
+          });
+          btnRef = a; return c;
+        }
+      });
+      const fsCtl = new FullscreenCtl();
+      map.addControl(fsCtl);
+      function updateIcon(){ if (!btnRef) return; btnRef.innerHTML = isFs()? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>'; setTimeout(()=>{ try{ map.invalidateSize(); }catch(_){} }, 50); }
+      ['fullscreenchange','webkitfullscreenchange','MSFullscreenChange','mozfullscreenchange'].forEach(ev=>document.addEventListener(ev, updateIcon));
+    })();
 
     document.getElementById('btnhome').onclick   = () => window.location.href = "index.html";
 

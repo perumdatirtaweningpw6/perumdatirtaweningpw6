@@ -48,11 +48,17 @@
     a { color: var(--ink); }
     footer { text-align:center; color:#aaa; font-size:.9rem; padding:16px 0; border-top:1px solid rgba(255,255,255,.1); margin-top:24px; }
     #map-tek { height: 340px; border-radius: 12px; }
+    /* Map toggle visibility */
+    #btnToggleMap{ display:none; }
+    #mapWrap{ display:block; }
     .thumb { max-width: 220px; width: 100%; height: auto; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); display:block; }
     @media (max-width: 576px){ .thumb{ max-width: 140px; } }
     /* Mobile layout tweaks */
     @media (max-width: 576px){
       #map-tek{ height: 260px; }
+      /* Hide map by default on mobile, show toggle button */
+      #btnToggleMap{ display:inline-block; }
+      #mapWrap{ display:none; }
       .card{ border-radius: 12px; }
       .btn{ font-size: 14px; }
       .form-control, .form-select{ font-size: 14px; }
@@ -84,7 +90,7 @@
     </div>
 
     <div class="row g-3">
-      <div class="col-lg-7" data-aos="fade-up">
+      <div class="col-lg-7 order-2 order-lg-1" data-aos="fade-up">
         <div class="card p-3 mb-3">
           <div class="card-header">Detail Pekerjaan</div>
           <div class="card-body">
@@ -113,10 +119,16 @@
                 <textarea id="catatan" rows="3" class="form-control" placeholder="Ringkas tindakan & hasil pemeriksaan"></textarea>
               </div>
               <div class="col-12">
-                <label class="form-label">Dokumentasi Hasil (foto)</label>
-                <input id="foto" type="file" accept="image/*" capture="environment" class="form-control">
-                <small class="text-secondary">Bisa ambil langsung dari kamera.</small>
-                <div class="mt-2" id="previewBox"></div>
+                <label class="form-label mb-1">Dokumentasi Sebelum Pekerjaan</label>
+                <input id="fotoSebelum" type="file" accept="image/*" capture="environment" class="form-control">
+                <small class="text-secondary">Ambil kondisi awal sebelum perbaikan.</small>
+                <div class="mt-2" id="previewSebelum"></div>
+              </div>
+              <div class="col-12">
+                <label class="form-label mb-1">Dokumentasi Sesudah Pekerjaan</label>
+                <input id="fotoSesudah" type="file" accept="image/*" capture="environment" class="form-control">
+                <small class="text-secondary">Ambil hasil akhir setelah perbaikan.</small>
+                <div class="mt-2" id="previewSesudah"></div>
               </div>
             </div>
           </div>
@@ -132,11 +144,14 @@
         <div class="mt-3" id="alertBox"></div>
       </div>
 
-      <div class="col-lg-5" data-aos="fade-up" data-aos-delay="50">
+      <div class="col-lg-5 order-1 order-lg-2" data-aos="fade-up" data-aos-delay="50">
         <div class="card p-3">
           <div class="card-header">Lokasi Penyelesaian</div>
           <div class="card-body">
-            <div id="map-tek"></div>
+            <button id="btnToggleMap" class="btn btn-outline-info btn-sm mb-2" type="button"><i class="fas fa-map-location-dot me-2"></i>Tampilkan Peta</button>
+            <div id="mapWrap">
+              <div id="map-tek"></div>
+            </div>
             <div class="row g-2 mt-2">
               <div class="col-6"><input id="lat" class="form-control" placeholder="Latitude"></div>
               <div class="col-6"><input id="lng" class="form-control" placeholder="Longitude"></div>
@@ -187,33 +202,98 @@ const TEKNISI_ENDPOINT = GAS_URL; // WAJIB: aktifkan kirim ke DataTeknisi
       document.getElementById('teknisi').value = namaLogin;
     }
 
-    // ====== Preview foto ======
-    const foto = document.getElementById('foto');
-    const previewBox = document.getElementById('previewBox');
-    foto.addEventListener('change', ()=>{
-      previewBox.innerHTML=''; const f=foto.files[0]; if(!f) return;
-      const img=document.createElement('img'); img.className='thumb mt-2'; img.alt='Preview dokumentasi';
-      const r=new FileReader(); r.onload=()=>img.src=r.result; r.readAsDataURL(f); previewBox.appendChild(img);
-    });
+    // ====== Preview foto (sebelum & sesudah) ======
+    const fotoSebelum = document.getElementById('fotoSebelum');
+    const fotoSesudah = document.getElementById('fotoSesudah');
+    const previewSebelum = document.getElementById('previewSebelum');
+    const previewSesudah = document.getElementById('previewSesudah');
 
-    // ====== Leaflet Map ======
+    function setupPreview(input, previewBox, alt){
+      input.addEventListener('change', ()=>{
+        previewBox.innerHTML=''; const f=input.files[0]; if(!f) return;
+        const img=document.createElement('img'); img.className='thumb mt-2'; img.alt=alt;
+        const r=new FileReader(); r.onload=()=>img.src=r.result; r.readAsDataURL(f); previewBox.appendChild(img);
+      });
+    }
+    setupPreview(fotoSebelum, previewSebelum, 'Preview sebelum pekerjaan');
+    setupPreview(fotoSesudah, previewSesudah, 'Preview sesudah pekerjaan');
+
+    // ====== Leaflet Map (lazy init + toggle) ======
     let map=null, marker=null;
     const elLat=document.getElementById('lat'), elLng=document.getElementById('lng');
-    if (typeof L!=='undefined') {
+    const mapWrap = document.getElementById('mapWrap');
+    const btnToggleMap = document.getElementById('btnToggleMap');
+    const isMobile = window.matchMedia('(max-width: 576px)').matches;
+
+    function initMap(){
+      if (map || typeof L==='undefined') return;
       map=L.map('map-tek',{zoomControl:true, preferCanvas:true}).setView([-6.9147,107.6098],12);
       const providers=[{u:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',o:{maxZoom:19}},{u:'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',o:{maxZoom:20}}];
       let tl=L.tileLayer(providers[0].u,providers[0].o).addTo(map);
       tl.on('tileerror',()=>{ map.removeLayer(tl); tl=L.tileLayer(providers[1].u,providers[1].o).addTo(map); });
-      function setPoint(lat,lng,zoom=true){ const pos=[lat,lng]; elLat.value=Number(lat).toFixed(6); elLng.value=Number(lng).toFixed(6); if(!marker) marker=L.marker(pos).addTo(map); else marker.setLatLng(pos); if(zoom) map.setView(pos, Math.max(map.getZoom(),16)); }
       map.on('click', e=>setPoint(e.latlng.lat,e.latlng.lng,false));
-      document.getElementById('btnSetLoc').addEventListener('click',()=>{ const la=parseFloat(elLat.value), lo=parseFloat(elLng.value); if(!Number.isFinite(la)||!Number.isFinite(lo)) return alert('Isi latitude/longitude valid.'); setPoint(la,lo,true); });
-      document.getElementById('btnClear').addEventListener('click',()=>{ elLat.value=''; elLng.value=''; if(marker){map.removeLayer(marker); marker=null;} map.setView([-6.9147,107.6098],12); });
-      document.getElementById('btnGeo').addEventListener('click',()=>{ if(!navigator.geolocation) return alert('Geolocation tidak didukung.'); navigator.geolocation.getCurrentPosition(p=>setPoint(p.coords.latitude,p.coords.longitude,true), e=>{console.error(e); alert('Gagal ambil lokasi.');},{enableHighAccuracy:true,timeout:8000,maximumAge:0}); });
+      // Ensure proper size after becoming visible
+      setTimeout(()=>{ try{ map.invalidateSize(); }catch(_){} }, 0);
     }
+
+    function setPoint(lat,lng,zoom=true){
+      const pos=[lat,lng];
+      elLat.value=Number(lat).toFixed(6);
+      elLng.value=Number(lng).toFixed(6);
+      if(!map) return;
+      if(!marker) marker=L.marker(pos).addTo(map); else marker.setLatLng(pos);
+      if(zoom) map.setView(pos, Math.max(map.getZoom(),16));
+    }
+
+    function showMap(){ if (mapWrap){ mapWrap.style.display='block'; } if(btnToggleMap){ btnToggleMap.innerHTML='<i class="fas fa-eye-slash me-2"></i>Sembunyikan Peta'; }
+      if (!map) { initMap(); } else { setTimeout(()=>{ try{ map.invalidateSize(); }catch(_){} }, 0); }
+    }
+    function hideMap(){ if (mapWrap){ mapWrap.style.display='none'; } if(btnToggleMap){ btnToggleMap.innerHTML='<i class="fas fa-map-location-dot me-2"></i>Tampilkan Peta'; } }
+
+    if (btnToggleMap){
+      btnToggleMap.addEventListener('click', ()=>{
+        const hidden = mapWrap && getComputedStyle(mapWrap).display==='none';
+        if (hidden) showMap(); else hideMap();
+      });
+    }
+
+    // Desktop: init immediately, Mobile: wait for toggle/interaction
+    if (!isMobile && typeof L!=='undefined') { initMap(); }
+
+    // Hook up controls; ensure map is visible on interaction
+    const btnSetLoc = document.getElementById('btnSetLoc');
+    const btnClear  = document.getElementById('btnClear');
+    const btnGeo    = document.getElementById('btnGeo');
+    if (btnSetLoc) btnSetLoc.addEventListener('click',()=>{
+      if (isMobile) showMap();
+      if (!map) initMap();
+      const la=parseFloat(elLat.value), lo=parseFloat(elLng.value);
+      if(!Number.isFinite(la)||!Number.isFinite(lo)) return alert('Isi latitude/longitude valid.');
+      setPoint(la,lo,true);
+    });
+    if (btnClear) btnClear.addEventListener('click',()=>{
+      elLat.value=''; elLng.value='';
+      if(marker&&map){ map.removeLayer(marker); marker=null; }
+      if(map) map.setView([-6.9147,107.6098],12);
+    });
+    if (btnGeo) btnGeo.addEventListener('click',()=>{
+      if (isMobile) showMap();
+      if (!navigator.geolocation) return alert('Geolocation tidak didukung.');
+      navigator.geolocation.getCurrentPosition(p=>{
+        if (!map) initMap();
+        setPoint(p.coords.latitude,p.coords.longitude,true);
+      }, e=>{ console.error(e); alert('Gagal ambil lokasi.'); }, {enableHighAccuracy:true,timeout:8000,maximumAge:0});
+    });
 
     // ====== Utils ======
     function toDataURL(file){ return new Promise((res,rej)=>{ if(!file) return res(''); const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
-    function resetForm(){ ['tiket','teknisi','tim','catatan'].forEach(id=>document.getElementById(id).value=''); foto.value=''; previewBox.innerHTML=''; if (elLat) elLat.value=''; if (elLng) elLng.value=''; if(marker&&map){map.removeLayer(marker); marker=null;} if(map) map.setView([-6.9147,107.6098],12); setWaktuNow(); }
+    function resetForm(){ ['tiket','teknisi','tim','catatan'].forEach(id=>document.getElementById(id).value='');
+      if (fotoSebelum) fotoSebelum.value=''; if (previewSebelum) previewSebelum.innerHTML='';
+      if (fotoSesudah) fotoSesudah.value=''; if (previewSesudah) previewSesudah.innerHTML='';
+      if (elLat) elLat.value=''; if (elLng) elLng.value='';
+      if(marker&&map){map.removeLayer(marker); marker=null;} if(map) map.setView([-6.9147,107.6098],12);
+      if (isMobile) hideMap();
+      setWaktuNow(); }
 
     // ====== Submit ======
     async function submitTeknisi(){
@@ -224,16 +304,16 @@ const TEKNISI_ENDPOINT = GAS_URL; // WAJIB: aktifkan kirim ke DataTeknisi
       const la=elLat.value.trim(), lo=elLng.value.trim();
       const lokasi=(la&&lo)?(la+','+lo):'';
       if(!tiket){ alertMsg('warning','Nomor tiket wajib diisi.'); return; }
-      // Validasi wajib koordinat + foto dokumentasi
+      // Validasi wajib koordinat + foto dokumentasi (sebelum & sesudah)
       const latNum = parseFloat(la), lngNum = parseFloat(lo);
-      const fotoInput = document.getElementById('foto');
-      const fotoFile = fotoInput.files[0];
+      const fileSebelum = (fotoSebelum && fotoSebelum.files[0]) || null;
+      const fileSesudah = (fotoSesudah && fotoSesudah.files[0]) || null;
       if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)){
         alertMsg('warning','Koordinat lokasi wajib diisi. Gunakan tombol "Pakai Lokasi Saya" atau klik peta.');
         return;
       }
-      if (!fotoFile){
-        alertMsg('warning','Foto dokumentasi wajib diunggah.');
+      if (!fileSebelum || !fileSesudah){
+        alertMsg('warning','Lengkapi foto dokumentasi: sebelum & sesudah.');
         return;
       }
 
@@ -246,8 +326,12 @@ const TEKNISI_ENDPOINT = GAS_URL; // WAJIB: aktifkan kirim ke DataTeknisi
 
         // 2) opsional: kirim detail teknisi jika endpoint ada
         if (TEKNISI_ENDPOINT){
-          const dokumentasi = await toDataURL(fotoFile);
-          const payload = new URLSearchParams({ mode:'teknisi_selesai', tiket, teknisi, tim, catatan, lokasi, waktu:waktu.value, dokumentasi });
+          const dokumentasi_sebelum = await toDataURL(fileSebelum);
+          const dokumentasi_sesudah = await toDataURL(fileSesudah);
+          // Keep backward compatibility: 'dokumentasi' = sesudah
+          const payload = new URLSearchParams({ mode:'teknisi_selesai', tiket, teknisi, tim, catatan, lokasi, waktu:waktu.value, dokumentasi: dokumentasi_sesudah });
+          payload.append('dokumentasi_sebelum', dokumentasi_sebelum);
+          payload.append('dokumentasi_sesudah', dokumentasi_sesudah);
           await fetch(TEKNISI_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body: payload.toString() });
         }
 
