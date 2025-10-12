@@ -1,184 +1,371 @@
 
+
 <!DOCTYPE html>
+
 <html lang="id">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>https://perumdatirtawening//DataPengaduan</title>
+
+  <title>perumdatirtaweningwilayah6.com</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+
   <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
   <style>
+
     :root { --brand:#4db8ff; --ink:#cfeaff; --panel: rgba(16, 40, 78, 0.85); --panel-soft: rgba(16, 40, 78, 0.65); }
+
     body { color: #fff; font-family: 'Segoe UI', sans-serif; min-height: 100vh; overflow-x: hidden; position: relative; background: #0b1f3b; }
+
     .navbar { background: rgba(11, 31, 59, 0.7); box-shadow: 0 2px 10px rgba(0,0,0,0.4); backdrop-filter: blur(8px); z-index: 1; }
+
     .navbar-brand { display: flex; align-items: center; gap: 10px; font-weight: bold; color: var(--brand) !important; }
+
     .card { background-color: var(--panel); border: none; border-radius: 16px; color: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+
     .card-header { background: var(--panel-soft); border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--ink); }
+
     .form-control, .form-select { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.12); }
+
     .form-control::placeholder { color: #cfeaff; opacity: .6; }
+
     .btn-brand { background: var(--brand); color: #07263f; border: none; }
+
     .badge-status { font-weight:600; }
+
     .badge-status.Baru { background:#6c757d; }
+
     .badge-status.Proses { background:#17a2b8; }
+
     .badge-status.Selesai { background:#28a745; }
+
     a { color: var(--ink); }
+
     footer { text-align:center; padding: 18px 0; color: #aaa; font-size:.9rem; border-top:1px solid rgba(255,255,255,0.1); margin-top:24px; }
+
   </style>
-  <link rel="stylesheet" href="css/responsive.css" />`n</head>
+
+  <link rel="stylesheet" href="css/responsive.css" />
+  
+  
+  </head>
+
+
 
 <body>
+
   <nav class="navbar navbar-dark px-4">
+
 <a class="navbar-brand" href="index.html">
+
       <img src="https://perumdatirtawening.co.id/asset/image/logo-horizon-kecils.gif" height="45" alt="Logo">
+
     </a>
+
     <div class="ms-auto d-flex flex-wrap gap-2">
+
       <a class="btn btn-sm btn-outline-info" href="pengaduan-input-gas.html">Input Pengaduan</a>
+
       <a class="btn btn-sm btn-outline-info" href="admin-data-teknisi.html">Data Teknisi</a>
+
       <button class="btn btn-sm btn-outline-danger" onclick="logout()">Logout</button>
+
     </div>
+
   </nav>
 
+
+
   <script>
+
     function isAuthed(){{ return !!localStorage.getItem('adm_auth'); }}
+
     function logout(){{ localStorage.removeItem('adm_auth'); location.href = 'admin-login.html'; }}
+
     if(!isAuthed() && !location.pathname.endsWith('admin-login.html')){{ location.href='admin-login.html'; }}
+
   </script>
 
+
+
   <div class="container py-4">
+
     <div class="text-center mb-3" data-aos="fade-down">
+
       <h3 class="fw-bold text-info"><i class="fas fa-list-check me-2"></i>Daftar Pengaduan</h3>
+
       <p class="text-secondary">Menampilkan pengaduan pelanggan</p>
+
     </div>
+
+
 
     <div class="card p-3 mb-3" data-aos="fade-up">
+
       <div class="row g-2 align-items-end">
+
         <div class="col-md-4">
+
           <label class="form-label">Pencarian</label>
+
           <input id="q" class="form-control" placeholder="Nama/Alamat/Tiket">
+
         </div>
+
         <div class="col-md-3">
+
           <label class="form-label">Status</label>
+
           <select id="fstatus" class="form-select">
+
             <option value="">Semua</option><option>Baru</option><option>Proses</option><option>Selesai</option>
+
           </select>
+
         </div>
+
         <div class="col-md-5 d-flex gap-2">
+
           <button class="btn btn-brand" onclick="render()">Terapkan</button>
+
           <a class="btn btn-outline-light" href="admin-data-pengaduan.html">Buka Detail</a>
+
           <button class="btn btn-outline-info" onclick="exportCSV()">Ekspor CSV</button>
+
         </div>
+
       </div>
+
     </div>
+
+
 
     <div class="card p-3" data-aos="fade-up" data-aos-delay="50">
+
       <div class="table-responsive">
+
         <table class="table table-dark table-hover align-middle">
+
           <thead>
+
             <tr>
+
               <th>#</th><th>Tiket</th><th>Tanggal</th><th>Nama</th><th>Jenis</th><th>Status</th><th>Lokasi</th><th>Aksi</th>
+
             </tr>
+
           </thead>
+
           <tbody id="tb"></tbody>
+
         </table>
+
       </div>
+
       <div class="d-flex justify-content-between mt-2">
+
         <div><small id="countInfo" class="text-secondary"></small></div>
+
         <div class="d-flex gap-2">
-          <button class="btn btn-outline-light btn-sm" onclick="prev()">‹</button>
-          <button class="btn btn-outline-light btn-sm" onclick="next()">›</button>
+
+          <button class="btn btn-outline-light btn-sm" onclick="prev()">ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¹</button>
+
+          <button class="btn btn-outline-light btn-sm" onclick="next()">ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Âº</button>
+
         </div>
+
       </div>
+
     </div>
+
   </div>
 
+
+
  <script>
+
 function isAuthed() { return !!localStorage.getItem('adm_auth'); }
+
 function logout() { localStorage.removeItem('adm_auth'); location.href = 'admin-login.html'; }
+
 if (!isAuthed() && !location.pathname.endsWith('admin-login.html')) { location.href = 'admin-login.html'; }
 
+
+
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwMLCYvMZIM9uMuZlzqsnhroINTh8gcLr9fQcbQLTTP4LcqzBSO50hFJCfAFncBNnW5Bw/exec";
+
 const page = { idx: 0, size: 10 };
+
 let DATA = [];
+
+
 
 function badge(s) { return '<span class="badge badge-status '+s+'">'+s+'</span>'; }
 
+
+
 async function fetchList() {
+
   const url = GAS_URL + "?mode=aduan";
+
   const resp = await fetch(url);
+
   const list = await resp.json();
+
   return list.map(o => ({ 
+
     tiket:o["Tiket"], tanggal:o["Tanggal"], jenis:o["Jenis Keluhan"],
+
     nopel:o["Nomor Pelanggan"], nama:o["Nama Pelanggan"], alamat:o["Alamat"],
+
     kontak:o["Kontak"], ket:o["Keterangan"], lokasi:o["Lokasi"],
+
     foto:o["Dokumentasi Pengaduan"], status:o["Status"]
+
   }));
+
 }
+
+
 
 async function setStatus(tiket, status) {
-  if(!confirm('Ubah status '+tiket+' → '+status+'?')) return;
+
+  if(!confirm('Ubah status '+tiket+' ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ '+status+'?')) return;
+
   const url = GAS_URL + "?mode=update&tiket="+encodeURIComponent(tiket)+"&status="+encodeURIComponent(status);
+
   const resp = await fetch(url); const json = await resp.json();
+
   if(json.status==='success'){ await loadAndRender(); } else { alert('Gagal update.'); }
+
 }
+
+
 
 function filtered() {
+
   const qv=(q.value||'').toLowerCase(); const fs=fstatus.value;
+
   return DATA.filter(r=>{
+
     const hit=(r.nama||'').toLowerCase().includes(qv)||(r.alamat||'').toLowerCase().includes(qv)||(r.tiket||'').toLowerCase().includes(qv);
+
     const sOK=!fs||r.status===fs; return hit&&sOK;
+
   });
+
 }
+
+
 
 function exportCSV() {
+
   const rows = filtered();
+
   const header = ['Tiket','Tanggal','Nama','Nomor Pelanggan','Jenis','Status','Lokasi'];
+
   const content = rows.map(r=>[r.tiket,r.tanggal,r.nama,r.nopel,r.jenis,r.status,r.lokasi]);
+
   const csv=[header,...content].map(e=>e.join(',')).join('\n');
+
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+
   const url=URL.createObjectURL(blob); const a=document.createElement('a');
+
   a.href=url; a.download='daftar-pengaduan.csv'; a.click(); URL.revokeObjectURL(url);
+
 }
+
+
 
 function prev() { if(page.idx>0){ page.idx--; render(); } }
+
 function next() { const total=filtered().length; if((page.idx+1)*page.size<total){ page.idx++; render(); } }
 
+
+
 function render() {
+
   const rows=filtered(); const start=page.idx*page.size; const items=rows.slice(start,start+page.size);
+
   tb.innerHTML = items.map((r,i)=>`
+
     <tr>
+
       <td>${start+i+1}</td>
+
       <td><a href="admin-data-pengaduan.html?tiket=${encodeURIComponent(r.tiket)}"><strong>${r.tiket||''}</strong></a></td>
+
       <td>${r.tanggal||''}</td>
+
       <td>${r.nama||''}<br><small class="text-secondary">${r.nopel||''}</small></td>
+
       <td>${r.jenis||''}</td>
+
       <td>${badge(r.status||'')}</td>
-      <td>${r.lokasi?`<a href="https://www.google.com/maps?q=${encodeURIComponent(r.lokasi)}" target="_blank">📍</a>`:''}</td>
+
+      <td>${r.lokasi?`<a href="https://www.google.com/maps?q=${encodeURIComponent(r.lokasi)}" target="_blank">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â</a>`:''}</td>
+
       <td>
+
         <div class="btn-group btn-group-sm">
+
           <button class="btn btn-outline-light" onclick="setStatus('${r.tiket}','Proses')">Proses</button>
+
           <button class="btn btn-outline-light" onclick="setStatus('${r.tiket}','Selesai')">Selesai</button>
+
         </div>
+
       </td>
+
     </tr>
+
   `).join('');
+
   countInfo.textContent=`Menampilkan ${rows.length?start+1:0}-${Math.min(start+page.size, rows.length)} dari ${rows.length} tiket`;
+
 }
+
+
 
 async function loadAndRender() { 
+
   try { DATA=await fetchList(); page.idx=0; render(); }
+
   catch(e) { alert('Gagal memuat data. Cek GAS_URL.'); }
+
 }
 
+
+
 if(!localStorage.getItem('adm_auth')) location.href='admin-login.html';
+
 loadAndRender();
+
 </script>
+
+
 
   </script>
 
-  <footer>© 2025 PDAM Tirtawening — Admin</footer>
+
+
+  <footer>© 2025 PDAM Wilayah6 . All rights reserved.</footer>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
   <script>AOS.init({duration:800, once:true});</script>
+
 </body>
+
 </html>
+

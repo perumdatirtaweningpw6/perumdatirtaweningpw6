@@ -1,853 +1,1708 @@
 <!DOCTYPE html>
+
 <html lang="id">
+
 <head>
+
   <meta charset="UTF-8"/>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>perumdatirtawening.com</title>
+
+  <title>perumdatirtaweningwilayah6.com</title>
+
+
 
   <!-- libs -->
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
   <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+
   <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet"/>
 
+
+
   <style>
+
     :root { --brand:#4db8ff; --ink:#cfeaff; --panel: rgba(16, 40, 78, 0.85); --panel-soft: rgba(16, 40, 78, 0.65); }
+
     body { background:#0b1f3b; color:#fff; font-family:'Segoe UI',sans-serif; min-height:100vh; }
+
     .navbar { background: rgba(11,31,59,.7); box-shadow: 0 2px 10px rgba(0,0,0,.4); backdrop-filter: blur(10px); }
+
     .navbar-brand { color: var(--brand) !important; font-weight: 700; letter-spacing:.3px; }
+
     .app { display:grid; grid-template-columns: 270px 1fr; gap:16px; padding:16px; }
+
     .sidebar { background: var(--panel); border-radius:16px; padding:12px; height: calc(100vh - 86px); position: sticky; top:70px; display:flex; flex-direction:column; overflow:hidden; }
+
     .sidebar-body { flex:1 1 auto; overflow-y:auto; }
+
     .sidebar-footer { margin-top:auto; }
+
     .content 
+
     .card { background: var(--panel); border:none; border-radius:16px; color:#fff; }
+
     .card-header { background: var(--panel-soft); color: var(--ink); border-bottom: 1px solid rgba(255,255,255,.08); }
+
     .btn-brand { background: var(--brand); color:#07263f; border: none; }
+
     .form-control, .form-select { background: rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.15); }
+
     .form-control::placeholder { color:#cfeaff; opacity:.6; }
+
     a { color: var(--ink); }
+
     .nav-pills .nav-link { color:#cfeaff; }
+
     .nav-pills .nav-link.active { background: var(--brand); color:#07263f; font-weight:600; }
+
     .kpi { display:flex; align-items:center; gap:12px; }
+
     .kpi .icon { width:42px; height:42px; border-radius:12px; background: var(--panel-soft); display:flex; align-items:center; justify-content:center; }
+
     .kpi .num { font-size:1.6rem; font-weight:700; }
+
     .table thead th { white-space: nowrap; }
+
     .badge-status { font-weight:600; }
+
     .badge-status.Baru { background:#6c757d; }
+
     .badge-status.Proses { background:#17a2b8; }
+
     .badge-status.Selesai { background:#28a745; }
+
     /* Skeleton loader */
+
     .skel { position: relative; overflow: hidden; background: rgba(255,255,255,.08); border-radius:4px; }
+
     .skel::after { content:""; position:absolute; inset:0; transform: translateX(-100%); background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.18), rgba(255,255,255,0)); animation: shimmer 1.2s infinite; }
+
     @keyframes shimmer { 100% { transform: translateX(100%); } }
+
     /* Toast tweak for dark theme */
+
     .toast.text-bg-success, .toast.text-bg-danger, .toast.text-bg-info, .toast.text-bg-warning { box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+
     /* Photo grid for detail modal */
+
     .photo-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap:8px; }
+
     .photo-grid img { width:100%; height:120px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,.25); }
+
   </style>
-  <link rel="stylesheet" href="css/responsive.css" />`n</head>
+  <link rel="stylesheet" href="css/responsive.css" />
+  
+  
+  </head>
+
 <body>
+
   <nav class="navbar navbar-dark px-3">
+
     <a class="navbar-brand d-flex align-items-center" href="#">
+
       <img src="https://perumdatirtawening.co.id/asset/image/logo-horizon-kecils.gif" height="42" class="me-2" alt="Logo"/>
+
     </a>
 
+
+
     <div class="ms-auto d-flex align-items-center gap-2">
+
       <button class="btn btn-sm btn-outline-info" id="btnSettings"><i class="fas fa-gear me-1"></i>Settings</button>
+
       <button class="btn btn-sm btn-outline-danger" id="btnLogout"><i class="fas fa-right-from-bracket me-1"></i>Logout</button>
+
     </div>
+
   </nav>
 
+
+
   <div class="app container-fluid">
+
     <!-- SIDEBAR -->
+
     <aside class="sidebar">
+
   <div class="sidebar-body">
+
     <div class="mb-2 text-secondary small">Menu</div>
+
     <div class="nav nav-pills flex-column gap-1" id="menu">
+
       <button class="nav-link active" data-target="#tabOverview"><i class="fas fa-chart-pie me-2"></i>Overview</button>
+
       <button class="nav-link" data-target="#tabAduan"><i class="fas fa-ticket me-2"></i>Pengaduan</button>
+
       <button class="nav-link" data-target="#tabTeknisi"><i class="fas fa-screwdriver-wrench me-2"></i>Data Teknisi</button>
+
       <button class="nav-link" data-target="#tabUsers"><i class="fas fa-users me-2"></i>Users Teknisi</button>
+
     </div>
+
   </div>
+
   <div class="sidebar-footer">
+
     <hr class="border-secondary opacity-25"/>
+
     <div class="small text-secondary">  © 2025 Prumda Tirtawening. All rights reserved.</div>
+
   </div>
+
 </aside>
 
+
+
     <!-- CONTENT -->
+
     <main class="content">
+
       <!-- OVERVIEW -->
+
       <section id="tabOverview" class="tab card" data-aos="fade-up">
+
         <div class="card-header d-flex align-items-center justify-content-between">
+
           <div class="fw-bold"><i class="fas fa-chart-pie me-2"></i>Ringkasan</div>
+
           <div>
+
             <button class="btn btn-sm btn-outline-light" id="btnRefreshAll"><i class="fas fa-rotate me-1"></i>Refresh</button>
+
           </div>
+
         </div>
+
         <div class="card-body">
+
           <div class="row g-3">
+
             <div class="col-md-3">
+
               <div class="card p-3 h-100">
+
                 <div class="kpi">
+
                   <div class="icon"><i class="fas fa-list"></i></div>
+
                   <div>
+
                     <div class="num" id="kpiTotalAduan">-</div>
+
                     <div class="text-secondary small">Total Tiket</div>
+
                   </div>
+
                 </div>
+
               </div>
+
             </div>
+
             <div class="col-md-3">
+
               <div class="card p-3 h-100">
+
                 <div class="kpi">
+
                   <div class="icon"><i class="fas fa-hourglass-half"></i></div>
+
                   <div>
+
                     <div class="num" id="kpiAduanProses">-</div>
+
                     <div class="text-secondary small">Tiket Proses</div>
+
                   </div>
+
                 </div>
+
               </div>
+
             </div>
+
             <div class="col-md-3">
+
               <div class="card p-3 h-100">
+
                 <div class="kpi">
+
                   <div class="icon"><i class="fas fa-check-circle"></i></div>
+
                   <div>
+
                     <div class="num" id="kpiAduanSelesai">-</div>
+
                     <div class="text-secondary small">Tiket Selesai</div>
+
                   </div>
+
                 </div>
+
               </div>
+
             </div>
+
             <div class="col-md-3">
+
               <div class="card p-3 h-100">
+
                 <div class="kpi">
+
                   <div class="icon"><i class="fas fa-clipboard-check"></i></div>
+
                   <div>
+
                     <div class="num" id="kpiTeknisiRows">-</div>
+
                     <div class="text-secondary small">Laporan Teknisi</div>
+
                   </div>
+
                 </div>
+
               </div>
+
             </div>
+
           </div>
+
           <div class="mt-3 small text-secondary">
+
             <i class="fas fa-circle-info me-1"></i>Angka dihitung dari data yang diambil langsung dari Google Apps Script (GAS).
+
           </div>
+
         </div>
+
       </section>
+
+
 
       <!-- PENGADUAN -->
+
       <section id="tabAduan" class="tab card d-none" data-aos="fade-up">
+
         <div class="card-header fw-bold"><i class="fas fa-ticket me-2"></i>Daftar Pengaduan</div>
+
         <div class="card-body">
+
           <div class="row g-2 align-items-end mb-3">
+
             <div class="col-md-4">
+
               <label class="form-label">Pencarian</label>
+
               <input id="aduanQ" class="form-control" placeholder="Nama/Alamat/Tiket"/>
+
             </div>
+
             <div class="col-md-3">
+
               <label class="form-label">Status</label>
+
               <select id="aduanStatus" class="form-select">
+
                 <option value="">Semua</option>
+
                 <option>Baru</option>
+
                 <option>Proses</option>
+
                 <option>Selesai</option>
+
               </select>
+
             </div>
+
             <div class="col-md-5 d-flex gap-2">
+
               <button class="btn btn-brand" id="btnAduanApply">Terapkan</button>
+
               <button class="btn btn-outline-light" id="btnAduanReset">Reset</button>
+
               <button class="btn btn-outline-light" id="btnAduanReload"><i class="fas fa-rotate"></i></button>
+
             </div>
+
           </div>
+
           <div class="table-responsive">
+
             <table class="table table-dark table-hover align-middle">
+
               <thead>
+
                 <tr>
+
                   <th>#</th><th>Tiket</th><th>Tanggal</th><th>Nama</th><th>Jenis</th><th>Status</th><th>Lokasi</th><th>Aksi</th>
+
                 </tr>
+
               </thead>
+
               <tbody id="aduanTb"></tbody>
+
             </table>
+
           </div>
+
           <div class="d-flex justify-content-between mt-2">
+
             <small id="aduanCount" class="text-secondary"></small>
+
             <div class="d-flex gap-2">
-              <button class="btn btn-outline-light btn-sm" id="aduanPrev">‹</button>
-              <button class="btn btn-outline-light btn-sm" id="aduanNext">›</button>
+
+              <button class="btn btn-outline-light btn-sm" id="aduanPrev">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹</button>
+
+              <button class="btn btn-outline-light btn-sm" id="aduanNext">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âº</button>
+
             </div>
+
           </div>
+
         </div>
+
       </section>
+
+
 
       <!-- DATA TEKNISI -->
+
       <section id="tabTeknisi" class="tab card d-none" data-aos="fade-up">
+
         <div class="card-header fw-bold"><i class="fas fa-clipboard-check me-2"></i>Data Teknisi</div>
+
         <div class="card-body">
+
           <div class="row g-2 align-items-end mb-3">
+
             <div class="col-md-4">
+
               <label class="form-label">Pencarian</label>
+
               <input id="tekQ" class="form-control" placeholder="Tiket/Teknisi/Tim/Catatan"/>
+
             </div>
+
             <div class="col-md-4">
+
               <label class="form-label">Filter Waktu</label>
+
               <input id="tekQtime" class="form-control" placeholder="yyyy-mm / teks bebas"/>
+
             </div>
+
             <div class="col-md-4 d-flex gap-2">
+
               <button class="btn btn-brand" id="btnTekApply">Terapkan</button>
+
               <button class="btn btn-outline-light" id="btnTekExport">Ekspor CSV</button>
+
               <button class="btn btn-outline-light" id="btnTekReload"><i class="fas fa-rotate"></i></button>
+
             </div>
+
           </div>
+
           <div class="table-responsive">
+
             <table class="table table-dark table-hover align-middle">
+
               <thead>
+
                 <tr>
+
                   <th>#</th>
+
                   <th>Tiket</th>
+
                   <th>Teknisi / Tim</th>
+
                   <th>Waktu Selesai</th>
+
                   <th>Catatan</th>
+
                   <th>Lokasi</th>
+
                   <th>Foto</th>
+
                 </tr>
+
               </thead>
+
               <tbody id="tekTb"></tbody>
+
             </table>
+
           </div>
+
           <div class="d-flex justify-content-between mt-2">
+
             <small id="tekCount" class="text-secondary"></small>
+
             <div class="d-flex gap-2">
-              <button class="btn btn-outline-light btn-sm" id="tekPrev">‹</button>
-              <button class="btn btn-outline-light btn-sm" id="tekNext">›</button>
+
+              <button class="btn btn-outline-light btn-sm" id="tekPrev">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹</button>
+
+              <button class="btn btn-outline-light btn-sm" id="tekNext">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âº</button>
+
             </div>
+
           </div>
+
         </div>
+
       </section>
 
+
+
       <!-- USERS TEKNISI -->
+
 <section id="tabUsers" class="tab card d-none" data-aos="fade-up">
+
   <div class="card-header fw-bold">
+
     <i class="fas fa-users me-2"></i>Users Teknisi
+
   </div>
+
   <div class="card-body">
+
     <div class="row g-2 align-items-end mb-2">
+
       <div class="col-md-6">
+
         <input id="userQ" class="form-control" placeholder="Cari nama/email"/>
+
       </div>
+
       <div class="col-md-6 d-flex gap-2">
+
         <button class="btn btn-brand" id="btnUserApply">Terapkan</button>
+
         <button class="btn btn-outline-light" id="btnUserReload">
+
           <i class="fas fa-rotate"></i>
+
         </button>
+
       </div>
+
     </div>
 
+
+
     <div class="table-responsive">
+
       <table class="table table-dark table-hover align-middle">
+
         <thead>
+
           <tr>
+
             <th>#</th>
+
             <th>Nama</th>
+
             <th>Email</th>
+
             <th>Status</th>
+
             <th>Aksi</th>
+
           </tr>
+
         </thead>
+
         <tbody id="userTb"></tbody>
+
       </table>
+
     </div>
+
     <small id="userCount" class="text-secondary"></small>
+
   </div>
+
 </section>
 
 
+
+
+
   <!-- Modal Detail Teknisi -->
+
   <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+
     <div class="modal-dialog modal-lg modal-dialog-centered">
+
       <div class="modal-content" style="background: rgba(16, 40, 78, 0.95); color:#fff;">
+
         <div class="modal-header">
+
           <h5 class="modal-title"><i class="fas fa-id-card-clip me-2"></i>Detail Pekerjaan Teknisi</h5>
+
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+
         </div>
+
         <div class="modal-body">
+
           <div id="detailBody"></div>
+
         </div>
+
       </div>
+
     </div>
+
   </div>
 
+
+
   <!-- Toast container -->
+
   <div class="toast-container position-fixed top-0 end-0 p-3" id="toastWrap"></div>
 
+
+
   <!-- libs -->
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
   <script>AOS.init({duration:800, once:true});</script>
 
+
+
   <script>
+
   // ===================== KONFIG =====================
+
   const CFG = {
+
     GAS_URL: localStorage.getItem('cfg_gas') || 'https://script.google.com/macros/s/AKfycbxgeKsU2cdAbu5yzo8UcNBzOoX22WrrCTRxV-KCowOjXX7aqf4mcO5celFtF4D197ZMIw/exec',
+
     PAGE_SIZE: Number(localStorage.getItem('cfg_page')) || 10,
+
   };
+
   const _envEl = document.getElementById('envLabel');
+
   if (_envEl) {
+
     try { _envEl.textContent = 'GAS: ' + (new URL(CFG.GAS_URL)).hostname; }
+
     catch { _envEl.textContent = 'GAS: (invalid URL)'; }
+
   }
+
+
 
   // ===================== AUTH GUARD =====================
+
   function isAuthed(){ return !!localStorage.getItem('adm_auth'); }
+
   function logout(){ localStorage.removeItem('adm_auth'); location.href = 'admin-login.html'; }
+
   document.getElementById('btnLogout').addEventListener('click', logout);
+
   if (!isAuthed() && !location.pathname.endsWith('admin-login.html')) location.href = 'admin-login.html';
 
+
+
   // ===================== NAV =====================
+
   document.querySelectorAll('#menu .nav-link').forEach(btn=>{
+
     btn.addEventListener('click', ()=>{
+
       document.querySelectorAll('#menu .nav-link').forEach(b=>b.classList.remove('active'));
+
       btn.classList.add('active');
+
       const target = btn.getAttribute('data-target');
+
       document.querySelectorAll('.tab').forEach(s=>s.classList.add('d-none'));
+
       document.querySelector(target).classList.remove('d-none');
+
     });
+
   });
+
+
 
   // ===================== UTIL =====================
+
   const escCsv = x => `"${(x??'').toString().replace(/"/g,'""')}"`;
-  const mapLink = latlng => latlng && latlng.includes(',') ? `<a href="https://www.google.com/maps?q=${encodeURIComponent(latlng)}" target="_blank" title="${latlng}">📍</a>` : '';
+
+  const mapLink = latlng => latlng && latlng.includes(',') ? `<a href="https://www.google.com/maps?q=${encodeURIComponent(latlng)}" target="_blank" title="${latlng}">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â</a>` : '';
+
   const escHtml = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
   const safeUrl = u => (typeof u === 'string' && /^https?:\/\//i.test(u)) ? u : '';
+
   const parseDate = (v)=> {
+
     // Try common formats: "yyyy-mm-dd hh:mm:ss" or "dd/mm/yyyy hh:mm"
+
     if(!v) return 0;
+
     const s = String(v).trim();
+
     const d = new Date(s);
+
     if(!isNaN(d)) return d.getTime();
+
     const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
     if(m) return new Date(`${m[1]}-${m[2]}-${m[3]}`).getTime();
+
     const m2 = s.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})/);
+
     if(m2) return new Date(`${m2[3]}-${m2[2]}-${m2[1]}`).getTime();
+
     return 0;
+
   };
+
+
 
   // Toast helper (Bootstrap 5)
+
   function notify(type, msg){
+
     const wrap = document.getElementById('toastWrap');
+
     const el = document.createElement('div');
+
     const tone = type==='error' ? 'danger' : (type||'info');
+
     el.className = `toast align-items-center text-bg-${tone} border-0`;
+
     el.setAttribute('role','alert');
+
     el.innerHTML = `<div class="d-flex"><div class="toast-body">${escHtml(msg)}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>`;
+
     wrap.appendChild(el);
+
     const t = new bootstrap.Toast(el, { delay: 3500 });
+
     t.show();
+
     el.addEventListener('hidden.bs.toast', ()=> el.remove());
+
   }
+
+
 
   // Skeleton table helper
+
   function setTableLoading(tbodyId, colCount){
+
     const tb = document.getElementById(tbodyId);
+
     if(!tb) return;
+
     const rows = Math.min(CFG.PAGE_SIZE, 10);
+
     const widths = [24,80,120,100,80,60,40,100];
+
     tb.innerHTML = Array.from({length:rows}).map(()=>
+
       `<tr>` + Array.from({length:colCount}).map((_,i)=> `<td><div class="skel" style="height:12px;width:${widths[i%widths.length]}px"></div></td>`).join('') + `</tr>`
+
     ).join('');
+
   }
+
+
 
   // Normalize Google Drive links to direct-view URLs
+
   function normalizeDriveUrl(u){
+
     try{
+
       const url = new URL(u);
+
       if(url.hostname.includes('drive.google.com')){
+
         // case: /file/d/<id>/view
+
         const m = url.pathname.match(/\/file\/d\/([^/]+)\//);
+
         if(m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+
         // case: open?id=<id> or uc?id=<id>
+
         const id = url.searchParams.get('id');
+
         if(id) return `https://drive.google.com/uc?export=view&id=${id}`;
+
       }
+
     }catch{}
+
     return u;
+
   }
+
+
 
   function parsePhotos(s){
+
     if(!s) return [];
+
     const str = String(s);
+
     // If HTML anchor provided, extract href(s)
+
     const hrefs = Array.from(str.matchAll(/href\s*=\s*"([^"]+)"/ig)).map(m=>m[1]);
+
     const base = hrefs.length ? hrefs.join(',') : str;
+
     const raw = String(base)
+
       .split(/\s*[,\n;]\s*|\s{2,}/) // split by comma/newline/long spaces
+
       .map(x=>x.trim())
+
       .filter(Boolean);
+
     const urls = [];
+
     for(const r of raw){
+
       const n = normalizeDriveUrl(r);
+
       if(/^https?:\/\//i.test(n)) urls.push(n);
+
     }
+
     // dedupe
+
     return Array.from(new Set(urls));
+
   }
+
+
 
   // pick(): ambil nilai dari beberapa kemungkinan nama kolom
+
   function pick(o, names){
+
     for (const n of names) if (o[n] != null && String(o[n]).trim() !== "") return String(o[n]);
+
     const keys = Object.keys(o);
+
     for (const n of names){ const k = keys.find(k => k.toLowerCase() === n.toLowerCase()); if (k && o[k] != null && String(o[k]).trim() !== "") return String(o[k]); }
+
     return "";
+
   }
+
+
 
   // ===================== FETCHERS =====================
+
   async function fetchAduan(){
+
     const url = CFG.GAS_URL + '?mode=aduan';
+
     const resp = await fetch(url);
+
     if(!resp.ok) throw new Error('HTTP '+resp.status);
+
     const list = await resp.json();
 
+
+
     const mapped = list.map(o=>({
+
       tiket:o["Tiket"],
+
       tanggal:o["Tanggal"],
+
       jenis:o["Jenis Keluhan"],
+
       nopel:o["Nomor Pelanggan"],
+
       nama:o["Nama Pelanggan"],
+
       alamat:o["Alamat"],
+
       kontak:o["Kontak"],
+
       ket:o["Keterangan"],
+
       lokasi:o["Lokasi"],
+
       foto:o["Dokumentasi Pengaduan"],
+
       status:o["Status"],
+
     }));
+
+
 
     // sort terbaru di atas (by Tanggal)
+
     mapped.sort((a,b)=> parseDate(b.tanggal) - parseDate(a.tanggal));
+
     return mapped;
+
   }
+
+
 
   async function updateAduanStatus(tiket, status){
+
     const url = CFG.GAS_URL + '?mode=update&tiket=' + encodeURIComponent(tiket) + '&status=' + encodeURIComponent(status);
+
     const resp = await fetch(url);
+
     const json = await resp.json();
+
     if(json.status !== 'success') throw new Error(json.message || 'Gagal update');
+
     return true;
+
   }
+
+
 
   async function fetchTeknisi(){
+
     const resp = await fetch(CFG.GAS_URL + '?mode=teknisi');
+
     if(!resp.ok) throw new Error('HTTP '+resp.status);
+
     const list = await resp.json();
+
     const mapped = list.map(o=>({
+
       ts     : pick(o, ["Timestamp","Waktu Input","Created At","ts"]),
+
       tiket  : pick(o, ["Tiket","No Tiket","tiket"]),
+
       teknisi: pick(o, ["Teknisi","Nama Teknisi","teknisi"]),
+
       tim    : pick(o, ["Tim/Rayon","Tim","Rayon","tim"]),
+
       catatan: pick(o, ["Catatan","Keterangan","Deskripsi","catatan"]),
+
       lokasi : pick(o, ["Lokasi (lat,lng)","Lokasi","Koordinat","lokasi"]),
+
       waktu  : pick(o, ["Waktu Selesai","Waktu","Selesai","waktu"]),
+
       foto   : pick(o, ["Foto Hasil","Foto","Dokumentasi","dokumentasi"])
+
     }));
+
     // sort terbaru di atas (by waktu/ts)
+
     mapped.sort((a,b)=> (parseDate(b.waktu)||parseDate(b.ts)) - (parseDate(a.waktu)||parseDate(a.ts)));
+
     return mapped;
+
   }
+
+
 
   // Users Teknisi
+
   async function fetchUsers(){
+
     const parseUsers = (raw)=>{
+
       const arr = Array.isArray(raw) ? raw
+
                 : Array.isArray(raw?.data) ? raw.data
+
                 : Array.isArray(raw?.users) ? raw.users
+
                 : [];
+
       const pickAny = (o, keys)=>{
+
         if(!o) return '';
+
         for(const key of keys){
+
           if(o[key] != null && String(o[key]).trim() !== '') return o[key];
+
           const exact = Object.keys(o).find(k => k.toLowerCase() === String(key).toLowerCase());
+
           if(exact && o[exact] != null && String(o[exact]).trim() !== '') return o[exact];
+
         }
+
         return '';
+
       };
+
       return arr.map(r=>{
+
         const email = String(pickAny(r, ['Email','email','E-mail','mail'])).trim().toLowerCase();
+
         const nama  = String(pickAny(r, ['Nama','name','Nama Teknisi','nama'])).trim();
+
         let statusRaw = (r && (r.Status ?? r.status ?? r.Approved ?? r.approved ?? ''));
+
         let status = '';
+
         if(typeof statusRaw === 'boolean') status = statusRaw ? 'approved' : 'disabled';
+
         else status = String(statusRaw||'').trim().toLowerCase() || 'pending';
+
         return { email, nama, status };
+
       }).filter(u => u.email || u.nama);
+
     };
+
     try{
+
       // Primary mode
+
       let resp = await fetch(CFG.GAS_URL + '?mode=teknisi_users');
+
       if(!resp.ok) throw new Error('HTTP '+resp.status);
+
       let json = await resp.json();
+
       let users = parseUsers(json);
+
       // Fallbacks if empty or different mode name
+
       if(users.length === 0){
+
         const modes = ['teknisi_user_list','users_teknisi','users'];
+
         for(const m of modes){
+
           try{
+
             resp = await fetch(CFG.GAS_URL + '?mode=' + m);
+
             if(!resp.ok) continue;
+
             json = await resp.json();
+
             users = parseUsers(json);
+
             if(users.length) break;
+
           }catch{ /* ignore and try next */ }
+
         }
+
       }
+
       return users;
+
     }catch(e){
+
       console.error('fetchUsers error', e);
+
       return [];
+
     }
+
   }
+
+
 
   async function postAction(params){
+
     const resp = await fetch(CFG.GAS_URL, {
+
       method:'POST',
+
       headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+
       body: new URLSearchParams(params).toString()
+
     });
+
     try{ return await resp.json(); }catch{ return {status:'error'}; }
+
   }
+
+
 
   // ===================== STATE =====================
+
   const state = {
+
     aduan: { data:[], idx:0 },
+
     tek  : { data:[], idx:0 },
+
     users: { data:[] },
+
   };
 
+
+
   // ===================== RENDERERS =====================
+
   function renderOverview(){
+
     const total = state.aduan.data.length;
+
     const proses = state.aduan.data.filter(x=>x.status==='Proses').length;
+
     const selesai = state.aduan.data.filter(x=>x.status==='Selesai').length;
+
     const tekRows = state.tek.data.length;
+
     document.getElementById('kpiTotalAduan').textContent = total;
+
     document.getElementById('kpiAduanProses').textContent = proses;
+
     document.getElementById('kpiAduanSelesai').textContent = selesai;
+
     document.getElementById('kpiTeknisiRows').textContent = tekRows;
+
   }
+
+
 
   function aduanFiltered(){
+
     const q = (document.getElementById('aduanQ').value||'').toLowerCase();
+
     const fs = document.getElementById('aduanStatus').value;
+
     return state.aduan.data.filter(r=>{
+
       const hit = (r.nama||'').toLowerCase().includes(q) || (r.alamat||'').toLowerCase().includes(q) || (r.tiket||'').toLowerCase().includes(q);
+
       const sOK = !fs || r.status===fs; 
+
       return hit && sOK;
+
     });
+
   }
+
   function renderAduan(){
+
     const rows = aduanFiltered();
+
     const start = state.aduan.idx * CFG.PAGE_SIZE;
+
     const items = rows.slice(start, start + CFG.PAGE_SIZE);
+
     const badge = s => `<span class="badge badge-status ${s}">${s}</span>`;
+
     document.getElementById('aduanTb').innerHTML = items.map((r,i)=>`
+
       <tr>
+
         <td>${start+i+1}</td>
+
         <td><strong>${r.tiket||''}</strong></td>
+
         <td>${r.tanggal||''}</td>
+
         <td>${r.nama||''}<br><small class="text-secondary">${r.nopel||''}</small></td>
+
         <td>${r.jenis||''}</td>
+
         <td>${badge(r.status||'')}</td>
-        <td>${r.lokasi?`<a href="https://www.google.com/maps?q=${encodeURIComponent(r.lokasi)}" target="_blank">📍</a>`:''}</td>
+
+        <td>${r.lokasi?`<a href="https://www.google.com/maps?q=${encodeURIComponent(r.lokasi)}" target="_blank">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â</a>`:''}</td>
+
         <td>
+
           <div class="btn-group btn-group-sm">
+
             <button class="btn btn-outline-light" onclick="handleSetStatus('${r.tiket}','Proses')">Proses</button>
+
             <button class="btn btn-outline-light" onclick="handleSetStatus('${r.tiket}','Selesai')">Selesai</button>
+
           </div>
+
         </td>
+
       </tr>`).join('');
+
     document.getElementById('aduanCount').textContent = `Menampilkan ${rows.length?start+1:0}-${Math.min(start+CFG.PAGE_SIZE, rows.length)} dari ${rows.length} tiket`;
+
   }
+
   async function handleSetStatus(tiket, status){
+
     if(!confirm(`Ubah status tiket ${tiket} menjadi ${status}?`)) return;
+
     try{ await updateAduanStatus(tiket, status); await loadAduan(); alert('Status berhasil diupdate'); }
+
     catch(e){ alert('Gagal update: '+e.message); }
+
   }
+
+
 
   function tekFiltered(){
+
     const qv = (document.getElementById('tekQ').value||'').toLowerCase();
+
     const qt = (document.getElementById('tekQtime').value||'').toLowerCase();
+
     return state.tek.data.filter(r=>{
+
       const hitText = (r.tiket||'').toLowerCase().includes(qv) || (r.teknisi||'').toLowerCase().includes(qv) || (r.tim||'').toLowerCase().includes(qv) || (r.catatan||'').toLowerCase().includes(qv);
+
       const hitTime = !qt || (r.waktu||'').toLowerCase().includes(qt) || (r.ts||'').toLowerCase().includes(qt);
+
       return hitText && hitTime;
+
     });
+
   }
+
   function renderTek(){
+
     const rows = tekFiltered();
+
     const start = state.tek.idx * CFG.PAGE_SIZE;
+
     const items = rows.slice(start, start + CFG.PAGE_SIZE);
+
     document.getElementById('tekTb').innerHTML = items.map((r,i)=>{
+
       const idx = start + i;
+
       const pCount = parsePhotos(r.foto).length;
+
       const photoCell = pCount > 0
-        ? `<button type="button" class="btn btn-sm btn-outline-info open-photo" data-idx="${idx}" title="Lihat Foto">📸 x${pCount}</button>`
+
+        ? `<button type="button" class="btn btn-sm btn-outline-info open-photo" data-idx="${idx}" title="Lihat Foto">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â¸ x${pCount}</button>`
+
         : '-';
+
       return `
+
       <tr class="clickable-row" data-idx="${idx}">
+
         <td>${idx+1}</td>
+
         <td><strong>${r.tiket||''}</strong></td>
+
         <td>${r.teknisi||'-'}<br><small class="text-secondary">${r.tim||''}</small></td>
+
         <td>${r.waktu||''}</td>
+
         <td>${r.catatan||''}</td>
+
         <td>${mapLink(r.lokasi)}</td>
+
         <td>${photoCell}</td>
+
       </tr>`;
+
     }).join('');
+
     document.getElementById('tekCount').textContent = `Menampilkan ${rows.length?start+1:0}-${Math.min(start+CFG.PAGE_SIZE, rows.length)} dari ${rows.length} data`;
+
     document.querySelectorAll('#tekTb .clickable-row').forEach(tr=>{
+
       tr.addEventListener('click', ()=>{
+
         const idx = Number(tr.getAttribute('data-idx'));
+
         openDetail(tekFiltered()[idx]);
+
       });
+
     });
+
     document.querySelectorAll('#tekTb .open-photo').forEach(btn=>{
+
       btn.addEventListener('click', (e)=>{
+
         e.stopPropagation();
+
         const idx = Number(btn.getAttribute('data-idx'));
+
         openDetail(tekFiltered()[idx], true);
+
       });
+
     });
+
   }
+
   function openDetail(item, focusPhotos=false){
+
     const photos = parsePhotos(item.foto);
+
     const fotoHtml = photos.length
+
       ? `<div id="detailPhotos" class="photo-grid">${photos.map(u=>`<a href="${u}" target="_blank" rel="noopener"><img src="${u}" alt="Foto Hasil"/></a>`).join('')}</div>`
+
       : '<em class="text-secondary">Tidak ada foto</em>';
+
     const mapHtml = item.lokasi && item.lokasi.includes(',') ? `<a href="https://www.google.com/maps?q=${encodeURIComponent(item.lokasi)}" target="_blank" class="btn btn-sm btn-outline-info"><i class="fas fa-map-location-dot me-1"></i> Buka Maps</a>` : '<span class="text-secondary">Lokasi tidak tersedia</span>';
+
     document.getElementById('detailBody').innerHTML = `
+
       <div class="row g-3">
+
         <div class="col-md-6">
+
           <div class="mb-2"><strong>Tiket:</strong> ${escHtml(item.tiket)||'-'}</div>
+
           <div class="mb-2"><strong>Teknisi:</strong> ${escHtml(item.teknisi)||'-'}</div>
+
           <div class="mb-2"><strong>Tim/Rayon:</strong> ${escHtml(item.tim)||'-'}</div>
+
           <div class="mb-2"><strong>Waktu Selesai:</strong> ${escHtml(item.waktu)||'-'}</div>
+
           <div class="mb-2"><strong>Timestamp:</strong> ${escHtml(item.ts)||'-'}</div>
+
           <div class="mb-2"><strong>Lokasi:</strong> ${escHtml(item.lokasi)||'-'} ${mapHtml}</div>
+
           <div class="mb-2"><strong>Catatan:</strong><br>${escHtml(item.catatan).replace(/\n/g,'<br>')}</div>
+
         </div>
+
         <div class="col-md-6">${fotoHtml}</div>
+
       </div>`;
+
     const modalEl = document.getElementById('detailModal');
+
     const modal = new bootstrap.Modal(modalEl); modal.show();
+
     // image fallback: if blocked or not public, show open-link button instead
+
     setTimeout(()=>{
+
       document.querySelectorAll('#detailBody .photo-grid img').forEach(img=>{
+
         img.addEventListener('error', ()=>{
+
           const u = img.getAttribute('src') || '#';
+
           const a = document.createElement('a');
+
           a.href = u; a.target = '_blank'; a.rel = 'noopener';
+
           a.className = 'btn btn-sm btn-outline-light w-100';
+
           a.textContent = 'Buka Link Foto';
+
           img.replaceWith(a);
+
         }, { once:true });
+
       });
+
     }, 0);
+
     if(focusPhotos){
+
       setTimeout(()=>{
+
         const ph = document.getElementById('detailPhotos');
+
         if(ph) ph.scrollIntoView({behavior:'smooth', block:'start'});
+
       }, 150);
+
     }
+
   }
+
+
 
   function exportTekCSV(){
+
     const rows = tekFiltered();
+
     const header = ['Timestamp','Tiket','Teknisi','Tim/Rayon','Catatan','Lokasi (lat,lng)','Waktu Selesai','Foto Hasil'];
+
     const content = rows.map(r => [r.ts, r.tiket, r.teknisi, r.tim, r.catatan, r.lokasi, r.waktu, r.foto]);
+
     const csv = [header, ...content].map(e => e.map(escCsv).join(',')).join('\n');
+
     const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+
     const url = URL.createObjectURL(blob);
+
     const a = document.createElement('a'); a.href = url; a.download = 'data-teknisi.csv'; a.click(); URL.revokeObjectURL(url);
+
   }
+
+
 
   // USERS table
+
   function renderUsers(){
+
     const q = (document.getElementById('userQ').value||'').toLowerCase();
+
     const rows = state.users.data.filter(x=> (x.nama||'').toLowerCase().includes(q) || (x.email||'').toLowerCase().includes(q));
+
     if(rows.length === 0){
+
       document.getElementById('userTb').innerHTML = `<tr><td colspan="5" class="text-center text-secondary">Tidak ada data pengguna. Pastikan Apps Script menyediakan mode "teknisi_users" atau fallback lain, dan di-deploy Web App (Anyone).</td></tr>`;
+
       document.getElementById('userCount').textContent = '0 pengguna';
+
       return;
+
     }
+
     document.getElementById('userTb').innerHTML = rows.map((u,i)=>`
+
       <tr>
+
         <td>${i+1}</td>
+
         <td>${u.nama||''}</td>
+
         <td>${u.email||''}</td>
+
         <td class="text-capitalize">${u.status||''}</td>
+
         <td>
+
           <div class="btn-group btn-group-sm">
+
             <button class="btn btn-outline-light" onclick="actUser('approve','${u.email}')">Approve</button>
+
             <button class="btn btn-outline-light" onclick="actUser('disable','${u.email}')">Disable</button>
+
             <button class="btn btn-outline-light" onclick="actUser('delete','${u.email}')">Delete</button>
+
           </div>
+
         </td>
+
       </tr>`).join('');
+
     document.getElementById('userCount').textContent = `${rows.length} pengguna`;
+
   }
+
+
 
   async function actUser(action, email){
+
     if(!confirm(`${action.toUpperCase()} ${email}?`)) return;
+
     const ok = (r)=> r && (r.status === 'ok' || r.status === 'success');
+
     try{
+
       // Primary: unified setter
+
       let json = await postAction({ mode:'teknisi_user_set', email, action });
+
       if(ok(json)) { await loadUsers(); alert('Berhasil: ' + action); return; }
 
+
+
       // Fallback 1: POST legacy specific modes
+
       const map = { approve:'teknisi_approve', disable:'teknisi_disable', delete:'teknisi_delete' };
+
       const legacy = map[action];
+
       if(legacy){
+
         json = await postAction({ mode: legacy, email });
+
         if(ok(json)) { await loadUsers(); alert('Berhasil (legacy): ' + action); return; }
+
       }
+
+
 
       // Fallback 2: GET legacy specific modes
+
       if(legacy){
+
         try{
+
           const resp = await fetch(`${CFG.GAS_URL}?mode=${encodeURIComponent(legacy)}&email=${encodeURIComponent(email)}`);
+
           const maybe = await resp.json().catch(()=>({}));
+
           if(resp.ok && ok(maybe)) { await loadUsers(); alert('Berhasil (legacy GET): ' + action); return; }
+
         }catch{ /* ignore */ }
+
       }
 
+
+
       alert('Gagal: ' + (json?.message || 'Unknown'));
+
     }catch(e){
+
       console.error('actUser error', e);
+
       alert('Gagal melakukan aksi: ' + e.message);
+
     }
+
   }
+
+
 
   // ===================== LOADERS =====================
+
   async function loadAduan(){
+
     setTableLoading('aduanTb', 8); document.getElementById('aduanCount').textContent = 'Memuat...';
+
     try{ state.aduan.data = await fetchAduan(); state.aduan.idx = 0; renderAduan(); }
+
     catch(e){ notify('danger','Gagal memuat aduan: ' + e.message); throw e; }
+
     finally{ renderOverview(); }
+
   }
+
   async function loadTek(){
+
     setTableLoading('tekTb', 7); document.getElementById('tekCount').textContent = 'Memuat...';
+
     try{ state.tek.data   = await fetchTeknisi(); state.tek.idx   = 0; renderTek(); }
+
     catch(e){ notify('danger','Gagal memuat data teknisi: ' + e.message); throw e; }
+
     finally{ renderOverview(); }
+
   }
+
   async function loadUsers(){
+
     setTableLoading('userTb', 5); document.getElementById('userCount').textContent = 'Memuat...';
+
     try{ state.users.data = await fetchUsers(); renderUsers(); }
+
     catch(e){ notify('danger','Gagal memuat pengguna: ' + e.message); throw e; }
+
   }
+
+
 
   // ===================== EVENTS =====================
+
   // Tombol Refresh All (single handler + spinner)
+
   document.getElementById('btnRefreshAll').addEventListener('click', async ()=>{
+
     const btn = document.getElementById('btnRefreshAll');
+
     try{
+
       btn.disabled = true;
+
       btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Memuat...';
+
       await Promise.all([loadAduan(), loadTek(), loadUsers()]);
+
       notify('success','Data diperbarui');
+
     }catch(e){
+
       console.error(e);
+
       notify('danger','Gagal memuat data: ' + e.message);
+
     }finally{
+
       btn.disabled = false;
+
       btn.innerHTML = '<i class="fas fa-rotate me-1"></i>Refresh';
+
     }
+
   });
+
+
 
   // Aduan
+
   document.getElementById('btnAduanApply').addEventListener('click', renderAduan);
+
   document.getElementById('btnAduanReset').addEventListener('click', ()=>{ aduanQ.value=''; aduanStatus.value=''; renderAduan(); });
+
   document.getElementById('btnAduanReload').addEventListener('click', async ()=>{
+
     try{ await loadAduan(); }catch(e){ notify('danger','Gagal memuat aduan: ' + e.message); }
+
   });
+
   document.getElementById('aduanPrev').addEventListener('click', ()=>{ if(state.aduan.idx>0){ state.aduan.idx--; renderAduan(); } });
+
   document.getElementById('aduanNext').addEventListener('click', ()=>{ const total=aduanFiltered().length; if((state.aduan.idx+1)*CFG.PAGE_SIZE<total){ state.aduan.idx++; renderAduan(); } });
+
   document.getElementById('aduanQ').addEventListener('keydown', e=>{ if(e.key==='Enter') renderAduan(); });
 
+
+
   // Teknisi
+
   document.getElementById('btnTekApply').addEventListener('click', renderTek);
+
   document.getElementById('btnTekExport').addEventListener('click', exportTekCSV);
+
   document.getElementById('btnTekReload').addEventListener('click', async ()=>{
+
     try{ await loadTek(); }catch(e){ notify('danger','Gagal memuat data teknisi: ' + e.message); }
+
   });
+
   document.getElementById('tekPrev').addEventListener('click', ()=>{ if(state.tek.idx>0){ state.tek.idx--; renderTek(); } });
+
   document.getElementById('tekNext').addEventListener('click', ()=>{ const total=tekFiltered().length; if((state.tek.idx+1)*CFG.PAGE_SIZE<total){ state.tek.idx++; renderTek(); } });
+
   document.getElementById('tekQ').addEventListener('keydown', e=>{ if(e.key==='Enter') renderTek(); });
+
   document.getElementById('tekQtime').addEventListener('keydown', e=>{ if(e.key==='Enter') renderTek(); });
 
+
+
   // Users
+
   document.getElementById('btnUserApply').addEventListener('click', renderUsers);
+
   document.getElementById('btnUserReload').addEventListener('click', async ()=>{
+
     try{ await loadUsers(); }catch(e){ notify('danger','Gagal memuat pengguna: ' + e.message); }
+
   });
+
+
 
   // Settings modal (inline)
+
   document.getElementById('btnSettings').addEventListener('click', ()=>{
+
     const curGas = CFG.GAS_URL; const curPage = CFG.PAGE_SIZE;
+
     const html = `
+
     <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
+
       <div class="modal-dialog">
+
         <div class="modal-content" style="background: rgba(16, 40, 78, 0.95); color:#fff;">
+
           <div class="modal-header">
+
             <h5 class="modal-title"><i class="fas fa-gear me-2"></i>Settings</h5>
+
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+
           </div>
+
           <div class="modal-body">
+
             <div class="mb-3">
+
               <label class="form-label">GAS URL</label>
+
               <input id="cfgGas" class="form-control" value="${curGas}">
+
               <small class="text-secondary">URL Web App Google Apps Script (Deploy: Execute as Me, Anyone).</small>
+
             </div>
+
             <div class="mb-3">
+
               <label class="form-label">Page Size</label>
+
               <input id="cfgPage" type="number" class="form-control" value="${curPage}" min="5" max="100">
+
             </div>
+
           </div>
+
           <div class="modal-footer">
+
             <button class="btn btn-outline-light" data-bs-dismiss="modal">Tutup</button>
+
             <button class="btn btn-brand" id="btnSaveCfg">Simpan</button>
+
           </div>
+
         </div>
+
       </div>
+
     </div>`;
+
     const wrap = document.createElement('div'); wrap.innerHTML = html; document.body.appendChild(wrap);
+
     const modalEl = wrap.querySelector('#settingsModal');
+
     const modal = new bootstrap.Modal(modalEl); modal.show();
+
     modalEl.addEventListener('hidden.bs.modal', ()=> wrap.remove());
+
     wrap.querySelector('#btnSaveCfg').addEventListener('click', ()=>{
+
       const newGas = wrap.querySelector('#cfgGas').value.trim();
+
       const newPage = Number(wrap.querySelector('#cfgPage').value)||10;
+
       localStorage.setItem('cfg_gas', newGas);
+
       localStorage.setItem('cfg_page', newPage);
+
       alert('Disimpan. Reload halaman untuk menerapkan.');
+
     });
+
   });
 
+
+
   // ===================== INIT =====================
+
   (async function init(){
+
     try{
+
       await Promise.all([loadAduan(), loadTek(), loadUsers()]);
+
     }catch(e){
+
       console.error(e);
+
       notify('danger','Gagal memuat data awal. Cek GAS_URL & izin Web App (Anyone).');
+
     }
+
   })();
+
   </script>
+
 </body>
+
 </html>
+
+
+
+
 
 
 

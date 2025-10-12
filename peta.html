@@ -1,656 +1,1352 @@
 <!DOCTYPE html>
+
 <html lang="id">
+
 <head>
+
   <meta charset="UTF-8" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>perumdatirtawening.com</title>
+
+  <title>perumdatirtaweningwilayah6.com</title>
+
+
 
   <!-- LIBRARIES -->
+
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
   <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js"></script>
 
+
+
       <style>
+
     :root { --brand:#4db8ff; --bg:#0b1f3b; --panel: rgba(16,40,78,0.82); --panel-weak: rgba(16,40,78,0.6); }
+
     * { box-sizing: border-box; }
+
     body{ margin:0; font-family: Poppins, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--bg); color:#fff; }
+
     .navbar{ background: rgba(11,31,59,.8); backdrop-filter: blur(10px); box-shadow: 0 2px 10px rgba(0,0,0,.4); }
+
     .navbar-brand{ color: var(--brand)!important; font-weight:600; display:flex; align-items:center; gap:10px; }
+
     .app{ position:relative; display:grid; grid-template-columns: 1fr auto; height: calc(100vh - 64px); }
+
     #map{ width:100%; height:100%; }
+
     .right{ position:relative; background: var(--panel); border-left: 1px solid rgba(255,255,255,.08); display:flex; flex-direction:column; width:420px; transition: width .28s ease, opacity .2s ease; }
+
     .app.sidebar-collapsed .right{ width:0; opacity:0; pointer-events:none; }
+
     .tabs{ display:flex; gap:6px; padding:10px; background: var(--panel-weak); border-bottom:1px solid rgba(255,255,255,.08); }
+
     .tabs .tbtn{ flex:1; text-align:center; padding:8px 10px; border-radius:10px; cursor:pointer; font-size:13px; color:#cfe9ff; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); }
+
     .tabs .tbtn.active{ background: var(--brand); color:#06233f; font-weight:700; border-color: transparent; }
+
     .pane{ display:none; padding:12px; overflow:auto; }
+
     .pane.active{ display:block; }
+
     .card-soft{ background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px; }
+
     table.table-dark{ --bs-table-bg: transparent; }
+
     .badge-status{ font-weight:700; }
+
     .badge-status.Baru{ background:#ff6666; }
+
     .badge-status.Proses{ background:#ffc107; color:#111; }
+
     .badge-status.Selesai{ background:#28a745; }
+
     .legend{ background:#fff; color:#000; padding:8px 10px; border-radius:8px; box-shadow: 0 2px 8px rgba(0,0,0,.25); line-height:1.4; }
+
     /* Sidebar legend list */
+
     .legend-list { display:block; max-height:28vh; overflow:auto; padding:6px; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:10px; }
+
     .legend-item { display:flex; align-items:center; gap:8px; color:#cfe9ff; font-size:12px; padding:4px 2px; }
+
     .legend-swatch { width:14px; height:14px; border-radius:4px; border:1px solid rgba(0,0,0,.35); flex:0 0 auto; }
+
     /* DMA polygon label */
+
     .leaflet-tooltip.dma-label { background: rgba(255,255,255,.85); border: 1px solid rgba(0,0,0,.2); box-shadow: 0 2px 6px rgba(0,0,0,.25); color:#111; font-weight:700; padding:2px 6px; border-radius:6px; pointer-events: none; }
+
     /* Popup container restyle (no more flat white) */
+
     .leaflet-popup-content-wrapper{ background: rgba(16,40,78,.95); color:#e6f3ff; border-radius:16px; border:1px solid rgba(255,255,255,.12); box-shadow:0 16px 48px rgba(0,0,0,.55); backdrop-filter: blur(8px) saturate(115%); }
+
     .leaflet-popup-tip{ background: rgba(16,40,78,.95); border:1px solid rgba(255,255,255,.12); }
+
     .leaflet-container a.leaflet-popup-close-button{ color:#cfe9ff; }
+
     .leaflet-popup-content{ margin:12px 14px; }
+
     .leaflet-popup-content a{ color:#9fd0ff; text-decoration: none; }
+
     .leaflet-popup-content a:hover{ text-decoration: underline; }
+
     /* Popup tables unified look (stronger background) */
+
     .leaflet-popup-content .card-soft .table { --bs-table-bg: transparent; color:#e6f3ff; width:100%; border-collapse: separate; border-spacing:0; }
+
     .leaflet-popup-content .card-soft .table td,
+
     .leaflet-popup-content .card-soft .table th { border-color: rgba(255,255,255,.12); }
+
     .leaflet-popup-content .card-soft .table tbody tr td { background: rgba(16,40,78,.55); }
+
     .leaflet-popup-content .card-soft .table tbody tr:nth-child(even) td { background: rgba(16,40,78,.45); }
+
     .leaflet-popup-content .card-soft .table tbody tr td:first-child { color:#9fc6ff; font-weight:600; width:38%; background: rgba(16,40,78,.70); }
+
     .leaflet-popup-content .card-soft .table thead th { color:#cfe9ff; background: rgba(16,40,78,.75); }
+
     .pp-tab-btn { border:1px solid rgba(255,255,255,.08); }
+
     /* Improve text contrast inside popup tables */
+
     .leaflet-popup-content .card-soft .table td,
+
     .leaflet-popup-content .card-soft .table th{ color:#eaf4ff !important; font-size:13px; line-height:1.25; }
+
     .leaflet-popup-content .card-soft .table tbody tr td:first-child{ color:#d5e6ff !important; }
+
     .leaflet-popup-content .text-secondary{ color:#b7d0ef !important; opacity:.95; }
+
     .leaflet-popup-content .pp-tab-btn{ color:#d5e6ff; }
+
     /* Card inside popup spacing */
+
     .leaflet-popup-content .card-soft{ background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); }
+
     .leaflet-popup-content hr{ border-color: rgba(255,255,255,.12); opacity:.6; }
+
     /* Drawer controls */
+
     .drawer-expand{ position:absolute; right:10px; top:80px; z-index:500; display:none; }
+
     .app.sidebar-collapsed .drawer-expand{ display:inline-block; }
+
     .collapse-btn{ position:absolute; right:8px; top:8px; z-index:10; }
+
     .blink{ animation: blink 1.6s infinite ease-in-out; }
+
     @keyframes blink{ 0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.5; transform:scale(1.1);} }
+
     .footer{ padding:8px 12px; color:#99bcdc; font-size:12px; border-top:1px solid rgba(255,255,255,.08); }
+
     @media (max-width: 1024px){ .app{ grid-template-columns: 1fr; } .right{ height: 60vh; } #map{ height: 55vh; } }
+
     /* Mobile-first optimizations without affecting desktop */
+
     @media (max-width: 576px){
+
       .navbar{ padding-inline: 10px; }
+
       .navbar-brand img{ height: 36px; }
+
       .tabs{ gap:4px; padding:8px; }
+
       .tabs .tbtn{ padding:8px; font-size:12px; }
+
       .right{ width: 100vw; max-width: 100vw; }
+
       #map{ height: 60vh; }
+
       /* Aduan table: keep only No, Tiket, Nama, Status */
+
       .table-aduan th:nth-child(3), .table-aduan td:nth-child(3), /* Tanggal */
+
       .table-aduan th:nth-child(5), .table-aduan td:nth-child(5), /* Jenis */
+
       .table-aduan th:nth-child(7), .table-aduan td:nth-child(7), /* Lok */
+
       .table-aduan th:nth-child(8), .table-aduan td:nth-child(8)  /* Lihat */{ display:none; }
+
       .table-aduan th, .table-aduan td{ white-space: nowrap; }
+
       .legend-list{ max-height: 22vh; }
+
       .card-soft{ padding:10px; }
+
       .form-control, .form-select, .btn{ font-size: 14px; }
+
     }
+
     /* Arrears indicator */
+
     .arrears-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:9999px;background:#e53935;color:#fff;font-size:11px;font-weight:700;box-shadow:0 0 10px #e53935aa}
+
     .arrears-badge i{font-style:normal}
+
     .arrears-dot{width:10px;height:10px;border-radius:50%;background:#e53935;box-shadow:0 0 8px #e53935aa;display:inline-block}
+
   </style>
-  <link rel="stylesheet" href="css/responsive.css" />`n</head>
+
+  <link rel="stylesheet" href="css/responsive.css" />
+  
+  
+  </head>
+
 <body>
+
   <nav class="navbar navbar-dark px-3" style="height:64px;">
+
     <a class="navbar-brand d-flex align-items-center" href="#">
+
       <img src="https://perumdatirtawening.co.id/asset/image/logo-horizon-kecils.gif" height="42" alt="PDAM Tirtawening" />
+
     </a>
+
     <div class="ms-auto d-flex gap-2">
+
       <button id="btnhome" class="btn btn-sm btn-outline-success">Kembali</button>
+
       <button id="btnTogglePanel" class="btn btn-sm btn-outline-info">Panel</button>
+
     </div>
+
   </nav>
 
+
+
   <div class="app sidebar-collapsed">
+
     <div id="map"></div>
+
     <aside class="right">
+
       
+
       <div class="tabs">
+
         <div class="tbtn active" data-pane="pane-aduan"><i class="fa-solid fa-list"></i></div>
+
         <div class="tbtn" data-pane="pane-search"><i class="fa-solid fa-magnifying-glass"></i></div>
+
         <div class="tbtn" data-pane="pane-logger"><i class="fa-solid fa-gauge"></i></div>
+
         <div class="tbtn" data-pane="pane-layers"><i class="fa-solid fa-layer-group"></i></div>
+
       </div>
 
+
+
       <section id="pane-aduan" class="pane active">
+
         <div class="card-soft mb-2">
+
           <div class="row g-2 align-items-end">
+
             <div class="col-6">
+
               <label class="form-label">Pencarian</label>
+
               <input id="q" class="form-control form-control-sm" placeholder="Nama/Alamat/Tiket" />
+
             </div>
+
             <div class="col-4">
+
               <label class="form-label">Status</label>
+
               <select id="fstatus" class="form-select form-select-sm">
+
                 <option value="">Semua</option>
+
                 <option selected>Baru</option>
+
                 <option>Proses</option>
+
                 <option>Selesai</option>
+
               </select>
+
             </div>
+
             <div class="col-2 d-grid gap-1">
+
               <button class="btn btn-sm btn-info" onclick="renderList()">Go</button>
+
               <button class="btn btn-sm btn-outline-light" onclick="resetFilter()">Reset</button>
+
             </div>
+
           </div>
+
         </div>
 
+
+
         <div class="card-soft">
+
           <div class="table-responsive" style="max-height: 48vh; overscroll-behavior: contain;">
+
             <table class="table table-dark table-hover align-middle table-sm table-aduan">
+
               <thead>
+
                 <tr>
+
                   <th>#</th><th>Tiket</th><th>Tanggal</th><th>Nama</th><th>Jenis</th><th>Status</th><th>Lok</th><th>Lihat</th>
+
                 </tr>
+
               </thead>
+
               <tbody id="tb"></tbody>
+
             </table>
+
           </div>
+
           <div class="d-flex justify-content-between mt-2">
+
             <small id="countInfo" class="text-secondary"></small>
+
             <div class="d-flex gap-2">
+
               <button class="btn btn-outline-light btn-sm" onclick="prevPage()">&lsaquo;</button>
+
               <button class="btn btn-outline-light btn-sm" onclick="nextPage()">&rsaquo;</button>
+
             </div>
+
           </div>
+
         </div>
+
       </section>
+
+
 
       <section id="pane-search" class="pane">
+
         <div class="card-soft">
+
           <label class="form-label">Cari Pelanggan (by ID)</label>
+
           <div class="input-group input-group-sm">
+
             <input id="searchNama" class="form-control" placeholder="Masukkan ID pelanggan" />
+
             <button class="btn btn-info" onclick="cariNama()">Cari</button>
+
           </div>
+
           <small class="text-secondary d-block mt-1">Ketik ID pelanggan lalu tekan Enter atau tombol Cari.</small>
+
         </div>
+
       </section>
+
+
 
       <section id="pane-logger" class="pane">
+
         <div class="card-soft">
+
           <h6 class="mb-2">Logger</h6>
+
           <table class="table table-dark table-sm" id="tblTekanan">
+
             <thead><tr><th>Sensor</th><th>Tekanan</th><th>Waktu</th></tr></thead>
+
             <tbody><tr><td colspan="3">Memuat data...</td></tr></tbody>
+
           </table>
+
         </div>
+
       </section>
+
+
 
       <section id="pane-layers" class="pane">
+
         <div class="card-soft">
+
           <div class="mb-2">
+
             <label class="form-label">Peta Dasar</label>
+
             <div id="basemapGroup" class="btn-group btn-group-sm w-100" role="group">
+
               <button type="button" class="btn btn-outline-info active" data-base="light">Terang</button>
+
               <button type="button" class="btn btn-outline-secondary" data-base="dark">Gelap</button>
+
               <button type="button" class="btn btn-outline-success" data-base="sat">Satelit</button>
+
             </div>
+
           </div>
+
           <div class="form-check mb-1">
+
             <input class="form-check-input" type="checkbox" id="chkPelanggan" checked>
+
             <label for="chkPelanggan" class="form-check-label">Pelanggan</label>
+
           </div>
+
           <div class="form-check mb-1">
+
             <input class="form-check-input" type="checkbox" id="chkAduan" checked>
+
             <label for="chkAduan" class="form-check-label">Pengaduan</label>
+
           </div>
+
           <div class="form-check mb-1">
+
             <input class="form-check-input" type="checkbox" id="chkLegend" checked>
+
             <label for="chkLegend" class="form-check-label">Panduan DMA</label>
+
           </div>
+
           <div class="form-check mb-1">
+
             <input class="form-check-input" type="checkbox" id="chkWilayah" checked>
+
             <label for="chkWilayah" class="form-check-label">DMA</label>
+
           </div>
+
           <div class="form-check mb-1">
+
             <input class="form-check-input" type="checkbox" id="chkSensor" checked>
+
             <label for="chkSensor" class="form-check-label">Logger</label>
+
           </div>
+
           <div class="form-check mb-1">
+
             <input class="form-check-input" type="checkbox" id="chkPipa" checked>
+
             <label for="chkPipa" class="form-check-label">Pipa</label>
+
           </div>
+
           <div class="mt-3" id="legendSection">
+
             <label class="form-label">Panduan DMA</label>
+
             <div id="legendBox" class="legend-list"></div>
+
           </div>
+
         </div>
+
       </section>
 
-      <div class="footer">  © 2025 PDAM Tirtawening. All rights reserved.</div>
+
+
+      <div class="footer">  © 2025 PDAM Wilayah6 . All rights reserved..</div>
+
     </aside>
+
     
+
   </div>
 
+
+
   <audio id="notifSound" preload="auto">
+
     <source src="https://assets.mixkit.co/sfx/download/mixkit-correct-answer-tone-2870.wav" type="audio/wav">
+
   </audio>
 
+
+
   <script>
+
     // ======================= ENDPOINTS =======================
+
     const GAS_ADUAN = "https://script.google.com/macros/s/AKfycbxgeKsU2cdAbu5yzo8UcNBzOoX22WrrCTRxV-KCowOjXX7aqf4mcO5celFtF4D197ZMIw/exec"; // mode=aduan
+
     const GAS_PELANGGAN = "https://script.google.com/macros/s/AKfycbxgeKsU2cdAbu5yzo8UcNBzOoX22WrrCTRxV-KCowOjXX7aqf4mcO5celFtF4D197ZMIw/exec"; // mode=pelanggan, histori
 
+
+
     const endpoints = {
+
       pelanggan: GAS_PELANGGAN + "?mode=pelanggan",
+
       histori:   GAS_PELANGGAN + "?mode=histori", // build URLs per-param saat fetch
+
       aduan:     GAS_ADUAN + "?mode=aduan",
+
       tekanan:   "https://api.thingspeak.com/channels/3102639/feeds.json?results=5",
+
       pipa:      "pipaexisting.geojson",
+
       wilayah:   "dmapw6.geojson"
+
     };
+
+
 
     // ======================= MAP BASICS =======================
+
     const map = L.map('map',{ zoomAnimation:true, markerZoomAnimation:true, fadeAnimation:true, inertia:true }).setView([-6.9457,107.6093], 13);
+
     const baseLayers = {
+
       light: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
+
       dark:  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'),
+
       sat:   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}')
+
     };
+
     baseLayers.light.addTo(map);
+
     document.getElementById('btnhome').onclick   = () => window.location.href = "index.html";
+
     // Sidebar drawer handlers
+
 (function(){
+
   const app = document.querySelector('.app');
+
   const btnToggle = document.getElementById('btnTogglePanel');
+
   if(btnToggle){
+
     btnToggle.addEventListener('click', ()=>{
+
       app.classList.toggle('sidebar-collapsed');
+
     });
+
   }
+
 })();
+
 // Basemap controls in sidebar
+
     (function(){
+
       const grp = document.getElementById('basemapGroup');
+
       if(grp){
+
         grp.querySelectorAll('button[data-base]').forEach(btn=>{
+
           btn.addEventListener('click', ()=>{
+
             grp.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+
             btn.classList.add('active');
+
             setBase(btn.getAttribute('data-base'));
+
           });
+
         });
+
       }
+
     })();
+
     function setBase(mode){ for(const k in baseLayers){ if(map.hasLayer(baseLayers[k])) map.removeLayer(baseLayers[k]); } baseLayers[mode].addTo(map); }
 
+
+
     const clusterGroup = L.markerClusterGroup({ spiderfyOnEveryZoom:false, showCoverageOnHover:false, disableClusteringAtZoom:17 });
+
     map.addLayer(clusterGroup);
 
+
+
     // Tabs behavior
+
     document.querySelectorAll('.tbtn').forEach(btn=>{
+
       btn.addEventListener('click', ()=>{
+
         document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
+
         document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+
         btn.classList.add('active');
+
         document.getElementById(btn.dataset.pane).classList.add('active');
+
       });
+
     });
 
+
+
     // ======================= UTILITIES =======================
+
     function formatRupiah(n){ const x=Number(n); if(!isFinite(x)) return 'Rp 0'; return 'Rp ' + x.toLocaleString('id-ID'); }
-    function formatM3(v){ const n=Number(v); if(!isFinite(n)) return '0 m�'; return n.toLocaleString('id-ID',{maximumFractionDigits:2})+' m�'; }
+
+    function formatM3(v){ const n=Number(v); const suf=' m&sup3;'; if(!isFinite(n)) return '0'+suf; return n.toLocaleString('id-ID',{maximumFractionDigits:2})+suf; }
+
+    
+
     function cssEscape(s){ try { return CSS.escape(s); } catch(e){ return (s||'').toString().replace(/[^a-zA-Z0-9_-]/g,''); } }
+
     function badge(s){ return `<span class="badge badge-status ${s}">${s}</span>`; }
 
+
+
     // ======================= PELANGGAN =======================
+
     const markers = [];
+
     async function loadPelanggan(){
+
       try{
+
         const res = await fetch(endpoints.pelanggan);
+
         const geojson = await res.json();
+
         if(window.layerPelanggan){ clusterGroup.removeLayer(window.layerPelanggan); }
+
         window.layerPelanggan = L.geoJSON(geojson, {
+
           pointToLayer: (f, latlng)=> L.circleMarker(latlng, { radius:7, fillColor:'#4db8ff', color:'#fff', weight:1, fillOpacity:.9 }),
+
           onEachFeature: (feat, layer)=>{
+
             const p = feat.properties||{};
+
             const idP = (p["ID"] ?? p["No Pelanggan"] ?? p["NomorPelanggan"] ?? "").toString().trim();
+
             const statusRaw = (p["Status"] || p["Status Planggan"] || p["StatusBilling"] || "").toString().toLowerCase();
+
             const hasArrears = (Number(p["Tunggakan"])||0) > 0 || /tunggak|menunggak/.test(statusRaw);
+
             const uid = idP || ("anon-" + Math.random().toString(36).slice(2,8));
+
             const pemakaianVal = p["Pemakaian"] ?? p["Pakai"] ?? p["Pemakaian (m3)"];
+
             const historiLink = idP ? endpoints.histori : null;
 
+
+
             const popup = `
+
               <div class="card-soft" style="width:320px">
+
                 <div class="d-flex justify-content-between align-items-start">
+
                   <div>
+
                     <div class="fw-semibold">${p["Nama"]||p["Nama Pelanggan"]||'Pelanggan'}</div>
+
                     <div class="d-flex align-items-center gap-2">
+
                       ${idP?`<span class="badge text-bg-info">ID: ${idP}</span>`:''}
+
                       ${hasArrears?`<span class="arrears-badge"><span class="arrears-dot"></span> Menunggak</span>`:''}
+
                     </div>
+
                     <div class="text-secondary small mt-1">Pemakaian: <b>${formatM3(pemakaianVal)}</b></div>
+
                   </div>
+
                   <div class="text-end">
+
                     
-                    <div><a style="font-size:12px" target="_blank" href="https://www.google.com/maps?q=${feat.geometry.coordinates[1]},${feat.geometry.coordinates[0]}">?? Lokasi</a></div>
+
+                    <div><a style="font-size:12px" target="_blank" href="https://www.google.com/maps?q=${feat.geometry.coordinates[1]},${feat.geometry.coordinates[0]}"><i class="fas fa-location-dot me-1"></i>Lokasi</a></div>
+
                   </div>
+
                 </div>
+
                 <hr class="border-dark opacity-25"/>
 
+
+
                 <div class="d-flex gap-1">
+
                   <button class="btn btn-sm pp-tab-btn" style="background: var(--brand); color:#06233f;" data-target="detail-${uid}">Detail</button>
+
                   <button class="btn btn-sm pp-tab-btn" style="background: rgba(255,255,255,.08); color:#ddd;" data-target="tagihan-${uid}">Tagihan</button>
+
                   <button class="btn btn-sm pp-tab-btn" style="background: rgba(255,255,255,.08); color:#ddd;" data-target="riwayat-${uid}">Riwayat</button>
+
                   <button class="btn btn-sm pp-tab-btn" style="background: rgba(255,255,255,.08); color:#ddd;" data-target="foto-${uid}">Foto</button>
+
                 </div>
+
+
 
                 <div id="detail-${uid}" class="pp-sec" style="display:block; margin-top:0;">
+
                <table class="table table-sm table-striped table-bordered align-middle mt-1"
+
                style="margin:0; border-radius:8px; overflow-y:auto;">
+
               <tbody>
+
                     <tr><td>Golongan</td><td>${p["Golongan"]||'-'}</td></tr>
+
                     <tr><td>Status Pelanggan</td><td>${p["Status Planggan"]||p["Status"]||'-'}</td></tr>
+
                     <tr><td>Alamat</td><td>${p["Alamat"]||'-'}</td></tr>
+
                     <tr><td>Kelurahan</td><td>${p["Kelurahan"]||'-'}</td></tr>
+
                     <tr><td>Kecamatan</td><td>${p["Kecamatan"]||'-'}</td></tr>
+
                     <tr><td>Koordinat</td><td>${feat.geometry.coordinates[1]?.toFixed?.(6)||'-'}, ${feat.geometry.coordinates[0]?.toFixed?.(6)||'-'}</td></tr>
+
            </tbody>
+
           </table>
+
            </div>
+
                <div id="tagihan-${uid}" class="pp-sec" style="display:none; margin-top:0;">
+
                <table class="table table-sm table-striped table-bordered align-middle mt-1"
+
                style="margin:0; border-radius:8px; overflow:hidden;">
+
               <tbody>
+
                         <tr><td>Tagihan</td><td>${formatRupiah(p["Tagihan"])}</td></tr>
+
                         <tr><td>Pemakaian</td><td>${formatM3(p["Pemakaian"])}</td></tr>
+
                         <tr><td>Status Billing</td><td>${p["StatusBilling"]||'-'}</td></tr>
+
                         <tr><td>Tunggakan</td><td>${formatRupiah(p["Tunggakan"])}</td></tr>
+
                         <tr><td>Due Date</td><td>${p["Due Date"]||'-'}</td></tr>
+
                         <tr><td>Tanggal Bayar</td><td>${p["Tanggal Bayar"]||'-'}</td></tr>
+
                         <tr><td>Loket Bayar</td><td>${p["Loket Bayar"]||'-'}</td></tr>
+
                         <tr><td>Keterangan Catat</td><td>${p["Ketcatat"]||'-'}</td></tr>
+
               </tbody>
+
               </table>
+
               </div>
+
+
 
               <div id="riwayat-${uid}" class="pp-sec" style="display:none; margin-top:0;">
+
                 <div id="hist-${uid}" class="small text-secondary">Riwayat: memuat...</div>
+
               </div>
+
                  
 
+
+
                 <div id="foto-${uid}" class="pp-sec" style="display:none; margin-top:8px;">
+
                   ${ p["Foto Meter"] ? `<div class="mb-2"><div class="small text-secondary">Foto Meter</div><img src="${p["Foto Meter"]}" style="width:100%;border-radius:10px;"></div>` : '' }
+
                   ${ p["Foto Rumah"] ? `<div class="mb-2"><div class="small text-secondary">Foto Rumah</div><img src="${p["Foto Rumah"]}" style="width:100%;border-radius:10px;"></div>` : `<p class="text-secondary small">Tidak ada foto.</p>` }
+
                 </div>
+
               </div>`;
+
+
 
             layer.bindPopup(popup);
 
+
+
             layer.on('popupopen', async ()=>{
+
               const popupEl = layer.getPopup().getElement();
+
               if(!popupEl) return;
 
+
+
               const btns = popupEl.querySelectorAll('.pp-tab-btn');
+
               const secs = popupEl.querySelectorAll('.pp-sec');
+
               const setActive = (btn)=>{
+
                 btns.forEach(b=>{ b.style.background='rgba(255,255,255,.08)'; b.style.color='#ddd'; });
+
                 secs.forEach(s=> s.style.display='none');
+
                 btn.style.background='var(--brand)'; btn.style.color='#06233f';
+
                 const tgt = popupEl.querySelector('#'+btn.dataset.target);
+
                 if(tgt) tgt.style.display='block';
+
               };
+
               btns.forEach(b=> b.addEventListener('click', ()=> setActive(b)));
 
+
+
               const target = popupEl.querySelector('#hist-' + cssEscape(uid));
+
               if (target && !historiLink) {
+
                 target.textContent = 'Histori tidak tersedia (tanpa ID pelanggan).';
+
               } else if (target && historiLink) {
+
                 try{
+
                   const enc = encodeURIComponent(idP);
+
                   const urls = [
+
                     `${historiLink}&id=${enc}`,
+
                     `${historiLink}&nopel=${enc}`,
+
                     `${historiLink}&nomor=${enc}`,
+
                     `${historiLink}&pelanggan=${enc}`
+
                   ];
+
                   let d = [];
+
                   for(const u of urls){
+
                     const r = await fetch(u);
+
                     const j = await r.json();
+
                     if(Array.isArray(j) && j.length){ d = j; break; }
+
                     if(j && Array.isArray(j.data) && j.data.length){ d = j.data; break; }
+
                     if(j && Array.isArray(j.result) && j.result.length){ d = j.result; break; }
+
                     if(j && Array.isArray(j.records) && j.records.length){ d = j.records; break; }
+
                   }
+
                   if(!Array.isArray(d) || !d.length){
+
                     target.textContent = 'Riwayat: kosong';
+
                   }else{
+
                     const mini =
+
                     target.textContent = 'Riwayat: ' + mini;
+
                   }
-                }catch(e){ console.error('Histori error', e); target.textContent='⚠️ Gagal ambil histori (CORS / format).'; }
+
+                }catch(e){ console.error('Histori error', e); target.textContent='ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Gagal ambil histori (CORS / format).'; }
+
               }
+
             });
 
+
+
             markers.push({ nama: (p["Nama"]||p["Nama Pelanggan"]||'').toString(), getLatLng: ()=>layer.getLatLng(), openPopup: ()=>layer.openPopup() });
+
           }
+
         });
+
         clusterGroup.addLayer(window.layerPelanggan);
+
         applyLayerVisibility();
+
       }catch(e){ console.error('Gagal memuat pelanggan', e); }
+
     }
 
-    // ======================= ADUAN (VIEW‑ONLY) =======================
+
+
+    // ======================= ADUAN (VIEWÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ONLY) =======================
+
     const page = { idx:0, size:10 };
+
     let ADUAN = [];
+
     let shownTickets = new Set();
 
+
+
     async function fetchAduan(){
+
       try{ const r = await fetch(endpoints.aduan); const list = await r.json();
+
         return Array.isArray(list)? list.map(o=>({
+
           tiket: o["Tiket"], tanggal: o["Tanggal"], jenis: o["Jenis Keluhan"],
+
           nopel: o["Nomor Pelanggan"] || o["NomorPelanggan"], nama: o["Nama Pelanggan"] || o["Nama"],
+
           alamat: o["Alamat"], kontak: o["Kontak"] || o["Nomor Kontak"], ket: o["Keterangan"],
+
           lokasi: o["Lokasi"] || o["Lokasi Gangguan"], foto: o["Dokumentasi Pengaduan"], status: o["Status"]||'Baru'
+
         })) : [];
+
       }catch(e){ console.error('Fetch aduan error', e); return []; }
+
     }
+
+
 
     function filteredAduan(){
+
       const qv = (document.getElementById('q').value||'').toLowerCase();
+
       const fs = document.getElementById('fstatus').value;
+
       return ADUAN.filter(r=>{
+
         const hit = (r.nama||'').toLowerCase().includes(qv) || (r.alamat||'').toLowerCase().includes(qv) || (r.tiket||'').toLowerCase().includes(qv);
+
         const sOK = !fs || r.status===fs; return hit && sOK;
+
       });
+
     }
+
+
 
     function renderList(){
+
       const rows = filteredAduan();
+
       const start = page.idx*page.size;
+
       const items = rows.slice(start, start+page.size);
+
       document.getElementById('tb').innerHTML = items.map((r,i)=>`
+
         <tr>
+
           <td>${start+i+1}</td>
+
           <td><strong>${r.tiket||''}</strong></td>
+
           <td>${r.tanggal||''}</td>
+
           <td>${r.nama||''}<br><small class="text-secondary">${r.nopel||''}</small></td>
+
           <td>${r.jenis||''}</td>
+
           <td>${badge(r.status||'')}</td>
-          <td>${r.lokasi?`<a href="https://www.google.com/maps?q=${encodeURIComponent(r.lokasi)}" target="_blank">??</a>`:''}</td>
+
+          <td>${r.lokasi?`<a href="https://www.google.com/maps?q=${encodeURIComponent(r.lokasi)}" target="_blank"><i class="fas fa-location-dot"></i></a>`:''}</td>
+
           <td><button class="btn btn-outline-info btn-sm" onclick="zoomToAduan('${r.tiket}')">Lihat</button></td>
+
         </tr>
+
       `).join('');
+
       document.getElementById('countInfo').textContent = `Menampilkan ${rows.length?start+1:0}-${Math.min(start+page.size, rows.length)} dari ${rows.length} tiket`;
+
     }
+
+
 
     function resetFilter(){ document.getElementById('q').value=''; document.getElementById('fstatus').value=''; page.idx=0; renderList(); }
+
     function prevPage(){ if(page.idx>0){ page.idx--; renderList(); } }
+
     function nextPage(){ const total=filteredAduan().length; if((page.idx+1)*page.size<total){ page.idx++; renderList(); } }
 
+
+
     function popupAduan(p){
+
       const status = p.status||'Baru';
+
       return `
+
         <div class="card-soft" style="width:320px">
+
           <div class="d-flex justify-content-between align-items-center">
+
             <div>
+
               <div class="fw-semibold">${p.nama||'Pelanggan'} <small class="text-secondary">${p.tiket||''}</small></div>
+
               <div class="small text-secondary">${p.tanggal||''}</div>
+
             </div>
-            <a style="font-size:12px" target="_blank" href="https://www.google.com/maps?q=${encodeURIComponent(p.lokasi||'')}">??  Lokasi</a>
+
+            <a style="font-size:12px" target="_blank" href="https://www.google.com/maps?q=${encodeURIComponent(p.lokasi||'')}"><i class="fas fa-location-dot me-1"></i>Lokasi</a>
+
           </div>
+
           <hr class="border-light opacity-25"/>
+
           <div class="small">
+
             <div><b>Jenis</b>: ${p.jenis||'-'}</div>
+
             <div><b>Telp</b>: ${p.kontak||'-'}</div>
+
             <div><b>Alamat</b>: ${p.alamat||'-'}</div>
+
             <div class="mt-2"><b>Status</b>: ${badge(status)}</div>
+
           </div>
+
           ${p.foto?`<img src="${p.foto}" style="width:100%;border-radius:10px; margin-top:8px;">`:''}
+
         </div>`;
+
     }
+
+
 
     function zoomToAduan(tiket){ if(!window.layerAduan) return; window.layerAduan.eachLayer(m=>{ const data=m.__data; if(data && data.tiket===tiket){ map.flyTo(m.getLatLng(), 18, {duration:1}); m.openPopup(); } }); }
 
+
+
     async function loadAduan(){
+
       try{
+
         ADUAN = await fetchAduan();
+
         page.idx = 0; renderList();
+
         if(window.layerAduan) map.removeLayer(window.layerAduan);
+
         window.layerAduan = L.layerGroup().addTo(map);
+
         const audio = document.getElementById('notifSound');
+
         ADUAN.filter(p=>p.lokasi && (p.status||'')==='Baru').forEach(p=>{
+
           const [lat,lng] = (p.lokasi||'').split(',').map(Number);
+
           if(isNaN(lat)||isNaN(lng)) return;
+
           if(!shownTickets.has(p.tiket)){
+
             shownTickets.add(p.tiket);
+
             if((p.status||'')==='Baru'){ audio.currentTime=0; audio.play().catch(()=>{}); }
+
           }
+
           const warna = p.status==='Baru'? '#ff3333' : p.status==='Proses'? '#FFD93D' : '#2ECC71';
+
           const iconHTML = `<div class="${p.status==='Baru'?'blink':''}" style="width:18px;height:18px;background:${warna};border:2px solid #fff;border-radius:50%;box-shadow:0 0 6px rgba(0,0,0,0.4);"></div>`;
+
           const marker = L.marker([lat,lng], { icon: L.divIcon({className:'', html:iconHTML, iconSize:[18,18], iconAnchor:[9,9]}) }).addTo(window.layerAduan);
+
           marker.__data = p; marker.bindPopup(popupAduan(p));
+
         });
+
         applyLayerVisibility();
+
       }catch(err){ console.error('Gagal memuat aduan', err); }
+
     }
+
+
 
     // ======================= TEKANAN =======================
+
     async function loadTekanan(){
+
       try{ const res = await fetch(endpoints.tekanan); const data = await res.json(); const feeds = data.feeds || [];
+
         if(window.tekananLayer) map.removeLayer(window.tekananLayer);
+
         window.tekananLayer = L.layerGroup().addTo(map);
+
         const titikSensor = [ [-6.9457,107.6093], [-6.9490,107.6125], [-6.9522,107.6060] ];
+
         const tbody = document.querySelector('#tblTekanan tbody'); tbody.innerHTML = '';
+
         feeds.slice(0,5).forEach((f,i)=>{
+
           const val = parseFloat(f.field1); if(isNaN(val)) return;
+
           const lokasi = titikSensor[i % titikSensor.length];
+
           const warna = val < 0.3 ? '#ff4d4d' : (val < 0.5 ? '#ffcc00' : '#00cc66');
+
           const markerHTML = `<div style="width:20px;height:20px;border-radius:50%;background:${warna};border:2px solid #fff;box-shadow:0 0 6px rgba(0,0,0,.4);"></div>`;
+
           const marker = L.marker(lokasi, { icon: L.divIcon({ html: markerHTML, iconSize:[20,20], className:'' }) }).addTo(window.tekananLayer);
+
           const waktu = new Date(f.created_at).toLocaleString('id-ID',{ day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Jakarta' });
-          marker.bindPopup(`<div class='card-soft'><div class='fw-semibold'>Sensor ${i+1}</div><div>💧 <b>${val.toFixed(2)} bar</b></div><div class='text-secondary small'>${waktu}</div></div>`);
+
+          marker.bindPopup(`<div class='card-soft'><div class='fw-semibold'>Sensor ${i+1}</div><div>Tekanan: <b>${val.toFixed(2)} bar</b></div><div class='text-secondary small'>${waktu}</div></div>`);
+
           const jam = new Date(f.created_at).toLocaleTimeString('id-ID',{ hour:'2-digit', minute:'2-digit', timeZone:'Asia/Jakarta' });
+
           const cls = val<0.3? 'style="color:#e53935;font-weight:600"' : val<0.5? 'style="color:#f9a825;font-weight:600"' : 'style="color:#2e7d32;font-weight:600"';
+
           tbody.insertAdjacentHTML('beforeend', `<tr><td>Sensor ${i+1}</td><td ${cls}>${val.toFixed(2)}</td><td>${jam}</td></tr>`);
+
         });
+
         applyLayerVisibility();
+
       }catch(err){ console.error('Gagal load tekanan', err); }
+
     }
+
+
 
     // ======================= SEARCH BY ID =======================
+
     function cariNama(){
+
       const input = document.getElementById('searchNama');
+
       const q = (input?.value||'').trim();
+
       if(!q){ alert('Masukkan ID pelanggan'); return; }
+
       let found = false;
+
       if (window.layerPelanggan){
+
         window.layerPelanggan.eachLayer(layer => {
+
           const props = (layer.feature && layer.feature.properties) || {};
+
           const id = String(props["ID"] ?? props["No Pelanggan"] ?? props["Nomor Pelanggan"] ?? props["NomorPelanggan"] ?? '').trim();
+
           if (id && id.toLowerCase().includes(q.toLowerCase())){
+
             map.flyTo(layer.getLatLng(), 18, { duration: 1 });
+
             layer.openPopup();
+
             found = true;
+
           }
+
         });
+
       }
+
       if (!found){ alert('ID pelanggan tidak ditemukan.'); }
+
     }
 
+
+
     // Enter to search
+
     (function(){
+
       const el = document.getElementById('searchNama');
+
       if(el){ el.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); cariNama(); } }); }
+
     })();
 
+
+
     // ======================= DMA & PIPA =======================
+
     const DMA_COLORS = { "DMA 1":"#1f77b4","DMA 2":"#ff7f0e","DMA 3":"#2ca02c","DMA 4":"#d62728","DMA 6":"#9467bd","DMA 8":"#8c564b","DMA 9":"#e377c2","DMA 11":"#7f7f7f","DMA 14":"#bcbd22","DMA 15":"#17becf","DMA 16":"#6baed6","DMA 16A":"#fd8d3c","DMA 17":"#31a354","SINGASANA PRADANA":"#9edae5" };
+
     function hslToHex(h,s,l){ s/=100; l/=100; const k=n=>(n + h/30)%12; const a=s*Math.min(l,1-l); const f=n=> l - a*Math.max(-1, Math.min(k(n)-3, Math.min(9-k(n),1))); const toHex=x=>Math.round(x*255).toString(16).padStart(2,'0'); return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`; }
+
     function hashColor(str){ let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return hslToHex(h%360,65,55); }
+
     const pickDMAColor = dma => DMA_COLORS[dma] || hashColor(String(dma||'UNKNOWN'));
+
+
 
     function featureStyle(feat){ const p=feat.properties||{}; const color = p.stroke || p.fill || pickDMAColor(p.DMA||p.name); return { color, weight:2, opacity:1, fillColor: p.fill||color, fillOpacity:.25 }; }
 
+
+
     async function loadWilayah(){
+
       try{ const r=await fetch(endpoints.wilayah); if(!r.ok) return; const data=await r.json();
+
         if(window.layerWilayah) map.removeLayer(window.layerWilayah);
+
         window.layerWilayah = L.geoJSON(data, { style: featureStyle, onEachFeature:(f,layer)=>{ const p=f.properties||{}; const name = p.DMA || p.name || "Wilayah"; layer.bindPopup(`<div class='card-soft'><div class='fw-semibold'>${name}</div><div class='small'><div><b>Koordinator</b>: ${p.KORDINATOR||'-'}</div><div><b>DMA</b>: ${p.DMA||'-'}</div><div><b>Eksisting</b>: ${p.EKSISTING||'-'}</div><div><b>Potensi</b>: ${p.POTENSI||'-'}</div></div></div>`); layer.bindTooltip(String(name), { permanent:true, direction:'center', className:'dma-label' }); } }).addTo(map);
+
         applyLayerVisibility();
+
       }catch(e){ console.error('Gagal wilayah', e); }
+
     }
+
+
 
     async function loadPipa(){
+
       try{ const r=await fetch(endpoints.pipa); if(!r.ok) return; const data=await r.json();
+
         // Jika koordinat UTM, skip konversi untuk stabilitas (opsional diaktifkan belakangan)
+
         if(window.layerPipa) map.removeLayer(window.layerPipa);
+
         window.layerPipa = L.geoJSON(data, { style: ()=>({ color:'#4db8ff', weight:3, opacity:.9 }) }).addTo(map);
+
         applyLayerVisibility();
+
       }catch(e){ /* opsional, abaikan error file lokal */ }
+
     }
+
+
 
     // ======================= LAYER VISIBILITY =======================
+
     const layersMap = { Pelanggan: ()=>window.layerPelanggan, Aduan: ()=>window.layerAduan, Wilayah: ()=>window.layerWilayah, Sensor: ()=>window.tekananLayer, Pipa: ()=>window.layerPipa };
+
     function applyLayerVisibility(){
+
       Object.keys(layersMap).forEach(name=>{
+
         const chk = document.getElementById('chk'+name);
+
         const lyr = layersMap[name] && layersMap[name]();
+
         if(!chk || !lyr) return;
+
         if(chk.checked){ if(!map.hasLayer(lyr)) map.addLayer(lyr); } else { if(map.hasLayer(lyr)) map.removeLayer(lyr); }
+
       });
+
       const chkLegend = document.getElementById('chkLegend');
+
       if(chkLegend){
+
         const sec = document.getElementById('legendSection');
+
         if(sec) sec.style.display = chkLegend.checked ? '' : 'none';
+
         // keep Leaflet legend hidden if it was added previously
+
         if(window._legendAdded && window.dmaLegend){ try{ map.removeControl(window.dmaLegend); }catch{} window._legendAdded=false; }
+
       }
+
     }
 
+
+
             // Render DMA legend into sidebar list (instead of Leaflet control)
+
     (function(){
+
       const box = document.getElementById('legendBox');
+
       if(!box) return;
+
       box.innerHTML = '';
+
       Object.entries(DMA_COLORS).forEach(([name, color])=>{
+
         const row = document.createElement('div');
+
         row.className = 'legend-item';
+
         row.innerHTML = `<span class="legend-swatch" style="background:${color}"></span><span>${name}</span>`;
+
         box.appendChild(row);
+
       });
+
     })();// ======================= INIT =======================
+
     loadPelanggan(); setInterval(loadPelanggan, 60000);
+
     // Set default filter ke "Baru" di load awal saja
+
     const fsEl = document.getElementById('fstatus'); if (fsEl) fsEl.value = 'Baru';
+
     loadAduan(); setInterval(loadAduan, 30000);
+
     loadTekanan(); setInterval(loadTekanan, 60000);
+
     loadWilayah(); setInterval(loadWilayah, 120000);
+
     loadPipa(); setInterval(loadPipa, 180000);
+
   </script>
+
 </body>
+
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
