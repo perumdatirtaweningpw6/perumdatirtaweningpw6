@@ -1,0 +1,7 @@
+# robots.txt for perumdatirtaweningwilayah6
+User-agent: *
+Allow: /
+
+# Update this to your actual domain once deployed
+Sitemap: https://perumdatirtaweningwilayah6.com/sitemap.xml
+

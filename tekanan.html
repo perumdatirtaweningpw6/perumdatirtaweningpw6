@@ -9,6 +9,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
   <title>perumdatirtaweningwilayah6.com</title>
+  <meta name="description" content="Pantau logger tekanan air wilayah 6 dalam tampilan kartu dan grafik.">
+  <meta property="og:title" content="Logger Tekanan • PDAM Wilayah 6" />
+  <meta property="og:description" content="Monitoring tekanan air dan lokasi sensor secara real-time." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://perumdatirtaweningwilayah6.com/tekanan.html" />
+  <meta property="og:image" content="https://perumdatirtawening.co.id/asset/image/logo-horizon-kecils.gif" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://perumdatirtawening.co.id/asset/image/logo-horizon-kecils.gif" />
 
 
 
@@ -91,6 +99,7 @@
       filter:brightness(40%) blur(1px);
 
     }
+    @media (max-width:576px){ #bg-video{ display:none; } body{ background:#0b1f3b linear-gradient(180deg,#0b1f3b,#0a1c35); } }
 
     .overlay{
 
@@ -259,7 +268,7 @@
 
     <div class="d-flex gap-2">
 
-      <a class="btn btn-outline-info btn-sm" href="index.html"><i class="fa-solid fa-house"></i></a>
+      <a class="btn btn-sm btn-outline-info" href="index.html">Halaman Utama</a>
 
     </div>
 
@@ -449,8 +458,8 @@
 
     const SENSOR_LOC = {
 
-      sensor1: { name: "Reservoir Utama", lat: -6.914744, lng: 107.60981 },
-
+      sensor1: { name: "Reservoir Utama", lat: -6.908797487519382, lng: 107.59149047726712 },
+ 
       // sensor2: { name: "Zona Timur", lat: -6.92184, lng: 107.6344 },
 
       // sensor3: { name: "Zona Barat", lat: -6.9052, lng: 107.6014 }
@@ -639,7 +648,9 @@
 
       try{
 
-        const res = await fetch(API_URL);
+        // Cache-busting and disable caching to keep it fresh
+        const url = API_URL + (API_URL.includes('?') ? '&' : '?') + 'ts=' + Date.now();
+        const res = await fetch(url, { cache: 'no-store' });
 
         const data = await res.json();
 
@@ -741,11 +752,19 @@
 
     loadPressure();
 
-    setInterval(loadPressure, 30000);
+    setInterval(loadPressure, 15000);
 
   </script>
 
   
+
+  <!-- Mobile Bottom Nav (visible only on small screens) -->
+  <nav class="mobile-nav d-sm-none">
+    <a href="index.html" aria-label="Home"><i class="fas fa-house"></i></a>
+    <a href="peta.html" aria-label="Peta"><i class="fas fa-map"></i></a>
+    <a href="Layanan.html" aria-label="Pengaduan"><i class="fas fa-bullhorn"></i></a>
+    <a href="tekanan.html" class="active" aria-label="Logger"><i class="fas fa-gauge-high"></i></a>
+  </nav>
 
 </body>
 

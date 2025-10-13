@@ -72,6 +72,8 @@
       #toastWrap{ top: auto; bottom: 12px; right: 50%; transform: translateX(50%); }
     }
   </style>
+  <link rel="stylesheet" href="css/responsive.css" />
+  
   </head>
 <body>
   <nav class="navbar navbar-dark px-3">
@@ -427,5 +429,13 @@ const TEKNISI_ENDPOINT = GAS_URL; // WAJIB: aktifkan kirim ke DataTeknisi
     loadTickets();
   });
   </script>
+  <!-- Mobile Bottom Nav (visible only on small screens) -->
+  <nav class="mobile-nav d-sm-none">
+    <a href="index.html" class="active" aria-label="Home"><i class="fas fa-house"></i></a>
+    <a href="peta.html" aria-label="Peta"><i class="fas fa-map"></i></a>
+    <a href="Layanan.html" aria-label="Pengaduan"><i class="fas fa-bullhorn"></i></a>
+    <a href="tekanan.html" aria-label="Logger"><i class="fas fa-gauge-high"></i></a>
+  </nav>
+
 </body>
 </html>

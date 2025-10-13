@@ -1,11 +1,27 @@
+/* Hide mobile nav by default (desktop and tablets) */
+.mobile-nav { display: none; }
+
 /* Mobile-first tweaks that do NOT alter desktop */
 @media (max-width: 576px) {
   /* Navbar */
-  .navbar { padding-inline: 10px; }
+  .navbar {
+    padding-inline: 10px;
+    padding-block: 0; /* keep fixed height tidy */
+    background: rgba(11, 31, 59, 0.55);
+    backdrop-filter: blur(10px);
+    height: 64px; /* match peta.html */
+    display: flex;
+    align-items: center;
+  }
+  /* Absolute centering for brand so it stays centered even with right-side actions */
+  .navbar .navbar-brand { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; }
   .navbar-brand img { height: 36px !important; }
+  /* Hide basic navbar buttons on mobile; page-specific overrides can re-enable */
+  .navbar .btn, .navbar .btn-group { display: none !important; }
 
   /* Containers */
   .container, .container-fluid { padding-left: 12px; padding-right: 12px; }
+  .container.py-5 { padding-top: 1.25rem !important; padding-bottom: 5rem !important; }
 
   /* Typography */
   h1 { font-size: 1.6rem; }
@@ -13,7 +29,11 @@
   h3 { font-size: 1.2rem; }
 
   /* Cards and panels */
-  .card, .card-soft { border-radius: 12px !important; }
+  .card, .card-soft { border-radius: 16px !important; box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important; padding: 16px; }
+  .card i { font-size: 2rem !important; }
+  .card h5 { font-size: 1rem; margin-bottom: 6px; }
+  .card p { font-size: 0.92rem; margin-bottom: 10px; }
+  .row.g-4 { row-gap: 12px !important; }
 
   /* Forms & buttons */
   .form-control, .form-select, .btn { font-size: 14px !important; }
@@ -26,7 +46,27 @@
   /* Maps */
   #map, #map-tek { height: 60vh; }
 
+  /* Social links spacing above bottom nav */
+  .social-links { margin-bottom: 72px; }
+
+  /* Mobile bottom navigation (Instagram-like) */
+  .mobile-nav {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 56px;
+    background: rgba(11, 31, 59, 0.78);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 5;
+  }
+  .mobile-nav a { color: #e9f1ff; opacity: 0.9; font-size: 1.4rem; text-decoration: none; }
+  .mobile-nav a.active, .mobile-nav a:hover { color: #4db8ff; opacity: 1; text-shadow: 0 0 10px #4db8ff; }
+
   /* Footer */
   footer { font-size: 0.85rem; }
 }
 
+/* (No extra rule needed; default is hidden) */

@@ -10,6 +10,17 @@
 
   <title>perumdatirtaweningwilayah6.com</title>
 
+  <meta name="description" content="Portal data & layanan PDAM Wilayah 6: peta pelayanan, pengaduan pelanggan, dan pemantauan logger tekanan.">
+  <meta property="og:title" content="PDAM Wilayah 6 • Portal Layanan" />
+  <meta property="og:description" content="Akses peta pelayanan, pengaduan, serta pemantauan logger tekanan." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://perumdatirtaweningwilayah6.com/" />
+  <meta property="og:image" content="https://perumdatirtawening.co.id/asset/image/logo-horizon-kecils.gif" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://perumdatirtawening.co.id/asset/image/logo-horizon-kecils.gif" />
+
+  
+
 
 
   <!-- Bootstrap -->
@@ -68,6 +79,12 @@
 
       filter: brightness(40%) blur(1px);
 
+    }
+
+    /* Mobile: gunakan gradient, nonaktifkan video untuk hemat data */
+    @media (max-width: 576px) {
+      #bg-video { display:none; }
+      body { background: #0b1f3b linear-gradient(180deg,#0b1f3b 0%, #0a1c35 100%); }
     }
 
 
@@ -226,6 +243,34 @@
 
     }
 
+    /* Social Links */
+    .social-links {
+      text-align: center;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .social-links .label {
+      color: #ccc;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .social-links a {
+      color: #4db8ff;
+      font-size: 2rem;
+      margin: 0 12px;
+      transition: color 0.2s ease, text-shadow 0.2s ease;
+      text-decoration: none;
+    }
+
+    .social-links a:hover {
+      color: #ffffff;
+      text-shadow: 0 0 12px #4db8ff;
+    }
+
   </style>
 
   <link rel="stylesheet" href="css/responsive.css" />
@@ -258,9 +303,7 @@
   <nav class="navbar navbar-dark px-4">
 
     <a class="navbar-brand" href="#">
-
       <img src="https://perumdatirtawening.co.id/asset/image/logo-horizon-kecils.gif" height="45" alt="Logo">
-
     </a>
 
   </nav>
@@ -348,6 +391,15 @@
 
 
   <!-- Footer -->
+  <div class="container" data-aos="fade-up">
+    <div class="social-links">
+      <div class="label">Hubungi/ikuti kami:</div>
+      <!-- TODO: ganti '#' di bawah dengan link akun Anda -->
+      <a href="https://wa.me/6285161600614" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+      <a href="https://instagram.com/anugrahaangga" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      <a href="https://t.me/anugrahaangga" target="_blank" rel="noopener" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+    </div>
+  </div>
 
   <footer>© 2025 PDAM Wilayah6 . All rights reserved.</footer>
 
@@ -371,7 +423,16 @@
 
   </script>
 
+  <!-- Mobile Bottom Nav (visible only on small screens) -->
+  <nav class="mobile-nav d-sm-none" aria-hidden="true">
+    <a href="index.html" class="active" aria-label="Home"><i class="fas fa-house"></i></a>
+    <a href="peta.html" aria-label="Peta"><i class="fas fa-map"></i></a>
+    <a href="Layanan.html" aria-label="Pengaduan"><i class="fas fa-bullhorn"></i></a>
+    <a href="tekanan.html" aria-label="Logger"><i class="fas fa-gauge-high"></i></a>
+  </nav>
+
 </body>
 
 </html>
+
 
