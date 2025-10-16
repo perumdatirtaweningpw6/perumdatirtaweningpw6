@@ -236,6 +236,33 @@
     .arrears-dot{width:10px;height:10px;border-radius:50%;background:#e53935;box-shadow:0 0 8px #e53935aa;display:inline-block}
     /* DMA text label style */
     .dma-label{ color:rgba(0,0,0,.65); font-weight:500; font-size:11px; background:transparent; text-shadow:none; pointer-events:none; }
+#basemapGroup .btn.active {
+  background-color: #0dcaf0 !important;
+  color: #fff !important;
+  border-color: #0dcaf0 !important;
+}
+.leaflet-control {
+  backdrop-filter: blur(10px);
+  background: rgba(11, 31, 59, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.leaflet-bar a {
+  color: #fff !important;
+  background: transparent !important;
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  font-size: 16px;
+  transition: background 0.2s ease;
+}
+
+.leaflet-bar a:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
 
   </style>
 
@@ -527,19 +554,67 @@
 
     // ======================= MAP BASICS =======================
 
-    const map = L.map('map',{ zoomAnimation:true, markerZoomAnimation:true, fadeAnimation:true, inertia:true }).setView([-6.9457,107.6093], 14);
+   // ========================
+// PETA UTAMA (TAMPILAN BARU BLUE TONE)
+// ========================
+const map = L.map('map', {
+  zoomAnimation: true,
+  markerZoomAnimation: true,
+  fadeAnimation: true,
+  inertia: true
+}).setView([-6.9457, 107.6093], 14);
 
-    const baseLayers = {
+// 💧 Blue tone basemap (Carto Light + filter biru lembut)
+const voyagerBlue = L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+  { attribution: '&copy; OpenStreetMap, &copy; CARTO', maxZoom: 19, detectRetina: true, className: 'blue-tone' }
+).addTo(map);
+// Definisi layer dasar
+const baseMaps = {
+  light: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap, &copy; CARTO', maxZoom: 19
+  }),
+  dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap, &copy; CARTO', maxZoom: 19
+  }),
+  sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '&copy; Esri, Maxar, Earthstar Geographics', maxZoom: 19
+  })
+};
 
-      light: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
+// Tambahkan default layer (Terang)
+baseMaps.light.addTo(map);
 
-      dark:  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'),
+// Efek overlay biru hanya aktif di mode Terang
+const basemapButtons = document.querySelectorAll('#basemapGroup button');
+basemapButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    // Hapus semua layer dasar dulu
+    Object.values(baseMaps).forEach(l => map.removeLayer(l));
 
-      sat:   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}')
+    // Ambil target base dari atribut data-base
+    const selectedBase = btn.getAttribute('data-base');
 
-    };
+    // Tambah layer yang dipilih
+    baseMaps[selectedBase].addTo(map);
 
-    baseLayers.light.addTo(map);
+    // Atur overlay biru hanya untuk mode terang
+    blueFilter.style.display = (selectedBase === 'light') ? 'block' : 'none';
+
+    // Update tampilan tombol aktif
+    basemapButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+// Overlay efek biru lembut di atas peta
+const overlayPane = map.getPane('overlayPane');
+const blueFilter = document.createElement('div');
+blueFilter.style.position = 'absolute';
+blueFilter.style.inset = '0';
+blueFilter.style.background = 'rgba(77, 184, 255, 0.12)';  // ubah opacity di sini kalau mau birunya lebih terang/gelap
+blueFilter.style.pointerEvents = 'none';
+overlayPane.appendChild(blueFilter);
+
 
     // Fullscreen control (native + CSS fallback for mobile)
     (function(){
@@ -554,8 +629,8 @@
 
       let btnRef = null;
       const FullscreenCtl = L.Control.extend({
-        options: { position: 'topright' },
-        onAdd: function(){
+  options: { position: 'topleft' },
+  onAdd: function () {
           const c = L.DomUtil.create('div','leaflet-bar leaflet-control');
           const a = L.DomUtil.create('a','',c); a.href='#'; a.title='Layar Penuh'; a.setAttribute('aria-label','Layar Penuh');
           a.innerHTML = '<i class="fas fa-expand"></i>';
@@ -1248,7 +1323,7 @@
 
         window.tekananLayer = L.layerGroup().addTo(map);
 
-        const titikSensor = [ [-6.9457,107.6093], [-6.9490,107.6125], [-6.9522,107.6060] ];
+        const titikSensor = [ [-6.9526189257595306, 107.59836683342257] ];
 
         const tbody = document.querySelector('#tblTekanan tbody'); tbody.innerHTML = '';
 
