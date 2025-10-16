@@ -201,9 +201,13 @@
 
     /* Leaflet map */
 
-    #map{ height:350px; border-radius:12px; overflow:hidden; }
+    #map{ height:260px; border-radius:12px; overflow:hidden; }
 
     .leaflet-container{ background:transparent; }
+    
+    @media (max-width:576px){ #map{ height:220px; } }
+
+    /* (removed equal height to avoid overly tall map) */
 
 
 
@@ -218,6 +222,10 @@
     }
 
     table td, table th{ border-color:rgba(255,255,255,0.08) !important; color:#f4f9ff; }
+    /* Compact history table */
+    #dataTable{ font-size:0.9rem; }
+    #dataTable td, #dataTable th{ padding:.35rem .5rem; }
+    #dataTable td{ white-space:nowrap; }
 
 
 
@@ -356,6 +364,10 @@
 
           <small id="lastUpdate" class="text-muted"></small>
 
+          <div class="mt-3">
+            <a href="https://tirtajabar.id/loggerlihatumum/" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info">Buka Dashboard Logger Tirtajabar</a>
+          </div>
+
         </div>
 
       </div>
@@ -363,51 +375,32 @@
     </div>
 
 
-
-    <!-- Peta Sensor -->
-
-    <div class="card p-3 mt-4" data-aos="fade-up" data-aos-delay="200">
-
-      <h5 class="section-title mb-3"><i class="fa-solid fa-map-location-dot me-2"></i>Lokasi Sensor Tekanan</h5>
-
-      <div id="map"></div>
-
-    </div>
-
-
-
-    <!-- Tabel Riwayat -->
-
-    <div class="card p-3 mt-4" data-aos="fade-up" data-aos-delay="250">
-
-      <h5 class="section-title mb-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>Riwayat Pembacaan Tekanan</h5>
-
-      <div class="table-responsive">
-
-        <table class="table table-bordered text-center align-middle mb-0" id="dataTable">
-
-          <thead>
-
-            <tr>
-
-              <th>Waktu</th>
-
-              <th>Sensor 1 (bar)</th>
-
-              <th>Sensor 2 (bar)</th>
-
-              <th>Sensor 3 (bar)</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody></tbody>
-
-        </table>
-
+    <!-- Peta + Riwayat (side by side on large screens) -->
+    <div class="row g-4 mt-1">
+      <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+        <div class="card p-3 h-100">
+          <h5 class="section-title mb-3"><i class="fa-solid fa-map-location-dot me-2"></i>Lokasi Sensor Tekanan</h5>
+          <div id="map"></div>
+        </div>
       </div>
-
+      <div class="col-lg-6" data-aos="fade-up" data-aos-delay="250">
+        <div class="card p-3 h-100">
+          <h5 class="section-title mb-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>Riwayat Pembacaan Tekanan</h5>
+          <div class="table-responsive">
+            <table class="table table-bordered table-sm text-center mb-0" id="dataTable">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Sensor 1 (bar)</th>
+                  <th>Sensor 2 (bar)</th>
+                  <th>Sensor 3 (bar)</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -416,7 +409,7 @@
 
   <!-- Footer (konsisten) -->
 
-  <footer>© 2025 PDAM Wilayah6 . All rights reserved.</footer>
+  <footer>© 2025 Prumda Tirtawening wilayah 6.</footer>
 
 
 
@@ -426,7 +419,7 @@
 
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
 
-  <script>
+    <script>
 
     AOS.init({ duration:800, once:true });
 
@@ -450,7 +443,7 @@
 
     const API_URL = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?results=10`;
 
-    const ALERT_URL = "https://script.google.com/macros/s/AKfycbz12345abcd/exec"; // ganti dgn URL GAS kamu
+    const ALERT_URL = "https://script\.google\.com/macros/s/AKfycbynOkn3NJuJvI8oE1Cuy83rW479Tod7e1Go72pRRH5F04XLkVpbytAXG3ARg-ZuqTLm0Q/exec"; // ganti dgn URL GAS kamu
 
 
 
@@ -497,6 +490,29 @@
       }).bindPopup(`<b>${s.name}</b><br>Menunggu data...`).addTo(map);
 
     });
+
+    // Keep map height equal to history table card
+    function syncMapHeight(){
+      try{
+        const mapDiv = document.getElementById('map');
+        const tableCard = document.querySelector('#dataTable')?.closest('.card');
+        const mapCard = mapDiv?.closest('.card');
+        if(!mapDiv || !tableCard || !mapCard) return;
+        const tableH = tableCard.clientHeight || 0;
+        const header = mapCard.querySelector('.section-title');
+        const headerH = header ? header.offsetHeight : 0;
+        const cs = getComputedStyle(mapCard);
+        const padding = parseFloat(cs.paddingTop||'0') + parseFloat(cs.paddingBottom||'0');
+        const desired = Math.max(220, tableH - headerH - padding - 8);
+        if(Math.abs((parseInt(mapDiv.style.height)||0) - desired) > 4){
+          mapDiv.style.height = desired + 'px';
+          setTimeout(()=>{ try{ map.invalidateSize(); }catch(_){} }, 60);
+        }
+      }catch(_){/* noop */}
+    }
+
+    const debounce = (fn, ms=120)=>{ let t; return (...a)=>{ clearTimeout(t); t = setTimeout(()=>fn(...a), ms); } };
+    window.addEventListener('resize', debounce(syncMapHeight, 150));
 
 
 
@@ -712,6 +728,9 @@
 
         renderChart(labels, p1, p2, p3);
 
+        // Match map height to history card after render
+        syncMapHeight();
+
 
 
       }catch(err){
@@ -753,6 +772,9 @@
     loadPressure();
 
     setInterval(loadPressure, 15000);
+
+    // Initial height sync once content is ready
+    setTimeout(syncMapHeight, 250);
 
   </script>
 

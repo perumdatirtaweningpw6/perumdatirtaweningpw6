@@ -1,434 +1,802 @@
+
+
 <!DOCTYPE html>
+
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>perumdatirtaweningwilayah6.com</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet"/>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
   <style>
+
     :root { --brand:#4db8ff; --ink:#cfeaff; --panel: rgba(16, 40, 78, 0.85); --panel-soft: rgba(16, 40, 78, 0.65); }
-    body { background:#0b1f3b; color:#fff; font-family:'Segoe UI',sans-serif; }
-    .navbar { background: rgba(11,31,59,.7); box-shadow: 0 2px 10px rgba(0,0,0,.4); backdrop-filter: blur(8px); }
-    .navbar-brand { color: var(--brand) !important; font-weight: 700; }
-    .card { background: var(--panel); border: none; border-radius: 16px; color: #fff; }
-    .card-header { background: var(--panel-soft); color: var(--ink); border-bottom: 1px solid rgba(255,255,255,.08); }
-    .form-control, .form-select { background: rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.2); }
-    /* Force visible text color in all inputs (Chrome/Edge WebKit fix) */
-    .form-control, .form-select, textarea.form-control {
-      color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; caret-color:#ffffff;
-    }
-    /* Keep dark background while focused so white text stays visible */
-    .form-control:focus, .form-select:focus { background: rgba(255,255,255,.12); border-color:#64c2ff; box-shadow: 0 0 0 .1rem rgba(100,194,255,.25); color:#fff; -webkit-text-fill-color:#fff; }
-    .form-control::placeholder, textarea.form-control::placeholder { color:#cfeaff; opacity:.85; }
-    /* Autofill background/text fix (Chrome) */
-    input.form-control:-webkit-autofill,
-    textarea.form-control:-webkit-autofill,
-    select.form-select:-webkit-autofill {
-      -webkit-text-fill-color:#ffffff !important;
-      caret-color:#ffffff;
-      transition: background-color 50000s ease-in-out 0s;
-      box-shadow: inset 0 0 0 1000px rgba(255,255,255,.12);
-      border-color: rgba(255,255,255,.25);
-    }
-    /* Disabled/read-only states - keep text visible on dark bg */
-    .form-control:disabled, .form-control[readonly], .form-select:disabled { background: rgba(255,255,255,.12); color:#ffffff; opacity:1; border-color: rgba(255,255,255,.25); -webkit-text-fill-color:#ffffff; }
-    /* Select dropdown items on dark theme */
-    .form-select option { background:#0f284d; color:#fff; }
-    .form-select { color:#fff; }
-    /* File input button & text */
-    input[type="file"].form-control { color:#cfeaff; }
-    input[type="file"].form-control::file-selector-button { background: var(--brand); color:#07263f; border: none; padding: .375rem .75rem; margin-right:.5rem; }
-    /* Hint to browsers to render native controls in dark scheme */
-    :root { color-scheme: dark; }
-    .btn-brand { background: var(--brand); color:#07263f; border:none; }
+
+    body { color: #fff; font-family: 'Segoe UI', sans-serif; min-height: 100vh; overflow-x: hidden; position: relative; background: #0b1f3b; }
+
+    .navbar { background: rgba(11, 31, 59, 0.7); box-shadow: 0 2px 10px rgba(0,0,0,0.4); backdrop-filter: blur(8px); z-index: 1; }
+
+    .navbar-brand { display: flex; align-items: center; gap: 10px; font-weight: bold; color: var(--brand) !important; }
+
+    .card { background-color: var(--panel); border: none; border-radius: 16px; color: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+
+    .card-header { background: var(--panel-soft); border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--ink); }
+
+    .badge-status { font-weight:600; }
+
+    .badge-status.Baru { background:#6c757d; }
+
+    .badge-status.Proses { background:#17a2b8; }
+
+    .badge-status.Selesai { background:#28a745; }
+
+    .form-control, .form-select { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.12); }
+    /* Ensure dropdown list text is visible (light list, dark value) */
+    select.form-select option, select.form-select optgroup { color:#111 !important; background:#fff !important; }
+
+    .btn-brand { background: var(--brand); color: #07263f; border: none; }
+
     a { color: var(--ink); }
-    footer { text-align:center; color:#aaa; font-size:.9rem; padding:16px 0; border-top:1px solid rgba(255,255,255,.1); margin-top:24px; }
-    #map-tek { height: 340px; border-radius: 12px; }
-    /* Map toggle visibility */
-    #btnToggleMap{ display:none; }
-    #mapWrap{ display:block; }
-    .thumb { max-width: 220px; width: 100%; height: auto; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); display:block; }
-    @media (max-width: 576px){ .thumb{ max-width: 140px; } }
-    /* Mobile layout tweaks */
-    @media (max-width: 576px){
-      #map-tek{ height: 260px; }
-      /* Hide map by default on mobile, show toggle button */
-      #btnToggleMap{ display:inline-block; }
-      #mapWrap{ display:none; }
-      .card{ border-radius: 12px; }
-      .btn{ font-size: 14px; }
-      .form-control, .form-select{ font-size: 14px; }
-      .d-flex.gap-2 > .btn{ flex:1 1 auto; }
-      .navbar .btn{ padding: 4px 10px; }
-    }
-    /* Toast placement */
-    #toastWrap { position: fixed; top: 12px; right: 12px; z-index: 1080; display:flex; flex-direction:column; gap:8px; }
-    .toast.text-bg-success, .toast.text-bg-danger, .toast.text-bg-info, .toast.text-bg-warning { box-shadow: 0 8px 24px rgba(0,0,0,.4); }
-    @media (max-width: 576px){
-      #toastWrap{ top: auto; bottom: 12px; right: 50%; transform: translateX(50%); }
-    }
+
+    /* Small helper for modal detail */
+    .col-fit{ width:1%; white-space:nowrap; }
+    .photo-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr)); gap:8px; }
+    .photo-grid img{ width:100%; height:90px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,.25); }
+    /* Compact location picker */
+    .loc-compact .btn{ width: 100%; text-align:left; }
+    .loc-compact .hint{ font-size:.9rem; color:#cfeaff; }
+    .loc-compact .stat{ font-size:.9rem; color:#cfeaff; }
   </style>
+
   <link rel="stylesheet" href="css/responsive.css" />
   
+  
   </head>
+
 <body>
-  <nav class="navbar navbar-dark px-3">
-    <a class="navbar-brand" href="index.html">
-      <img src="https://perumdatirtawening.co.id/asset/image/logo-horizon-kecils.gif" height="42" class="me-2" alt="Logo"/>
+
+  <nav class="navbar navbar-dark px-4">
+
+  <a class="navbar-brand" href="index.html">
+
+      <img src="https://perumdatirtawening.co.id/asset/image/logo-horizon-kecils.gif" height="45" alt="Logo">
+
     </a>
-    <div class="ms-auto">
-      <a class="btn btn-sm btn-outline-light" href="index.html"><i class="fas fa-house me-1"></i>Halaman Utama</a>
+
+    <div class="ms-auto d-flex gap-2">
+
+      <a class="btn btn-sm btn-outline-info" href="index.html">Halaman Utama</a>
+      
     </div>
+
   </nav>
 
+
+
   <div class="container py-4">
+
     <div class="text-center mb-3" data-aos="fade-down">
-      <h3 class="fw-bold text-info"><i class="fas fa-screwdriver-wrench me-2"></i>Selesaikan Pekerjaan</h3>
-      <p class="text-secondary">Isi form berikut untuk menandai tiket <em>Selesai</em>, unggah dokumentasi, dan set lokasi penyelesaian.</p>
+
+      <h3 class="fw-bold text-info"><i class="fas fa-queue me-2"></i>Daftar Antrian Tiket Pengaduan</h3>
+      <p>Klik Nomor Tiket Untuk Input Pekerjaan</p>
+      
+
     </div>
 
-    <div class="row g-3">
-      <div class="col-lg-7 order-2 order-lg-1" data-aos="fade-up">
-        <div class="card p-3 mb-3">
-          <div class="card-header">Detail Pekerjaan</div>
-          <div class="card-body">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Nomor Tiket</label>
-                <select id="tiket" class="form-select">
-                  <option value="">Pilih tiket dari daftar</option>
-                </select>
-                <small class="text-secondary">Menampilkan maks. 5 tiket terbaru (tanpa status/Baru), menyembunyikan yang berstatus Proses/Selesai.</small>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Tanggal & Waktu Selesai</label>
-                <input id="waktu" class="form-control" disabled>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Nama Teknisi</label>
-                <input id="teknisi" class="form-control" placeholder="Nama teknisi">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Tim </label>
-                <input id="tim" class="form-control" placeholder="Nama tim/rayon">
-              </div>
-              <div class="col-12">
-                <label class="form-label">Catatan Pekerjaan</label>
-                <textarea id="catatan" rows="3" class="form-control" placeholder="Ringkas tindakan & hasil pemeriksaan"></textarea>
-              </div>
-              <div class="col-12">
-                <label class="form-label mb-1">Dokumentasi Sebelum Pekerjaan</label>
-                <input id="fotoSebelum" type="file" accept="image/*" class="form-control">
-                <div class="mt-2 d-flex flex-wrap gap-2">
-                  <button type="button" class="btn btn-sm btn-outline-info picker" data-for="fotoSebelum" data-mode="camera"><i class="fas fa-camera me-1"></i>Ambil dari Kamera</button>
-                  <button type="button" class="btn btn-sm btn-outline-light picker" data-for="fotoSebelum" data-mode="gallery"><i class="fas fa-image me-1"></i>Pilih dari Galeri</button>
+
+
+    <div class="card p-3 mb-3" data-aos="fade-up">
+
+      <div class="row g-2 align-items-end">
+
+        <div class="col-md-4">
+
+          <label class="form-label">Pencarian</label>
+
+          <input id="q" class="form-control" placeholder="Nama/Alamat/Tiket">
+
+        </div>
+
+        <div class="col-md-3">
+
+          <label class="form-label">Tanggal</label>
+
+          <input id="fdate" type="date" class="form-control" />
+
+        </div>
+
+        <div class="col-md-5 d-flex gap-2">
+
+          <button class="btn btn-brand" onclick="render()">Terapkan</button>
+
+          <button class="btn btn-outline-light" onclick="resetFilter()">Reset</button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <div class="card p-3" data-aos="fade-up" data-aos-delay="50">
+
+      <div class="d-flex justify-content-end gap-2 mb-2">
+        <button id="btnRefreshList" class="btn btn-outline-light btn-sm" type="button"><i class="fas fa-rotate"></i> Refresh</button>
+      </div>
+
+      <div class="table-responsive" id="aduanTableWrap">
+
+        <table class="table table-dark table-hover align-middle aduan-table">
+
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tiket</th>
+              <th>Tanggal</th>
+              <th>Nama Pelanggan</th>
+              <th>Nomor Kontak</th>
+              <th>Lokasi Gangguan</th>
+            </tr>
+          </thead>
+
+          <tbody id="tb"></tbody>
+
+        </table>
+
+      </div>
+
+      <div class="d-flex justify-content-between mt-2">
+
+        <div><small id="countInfo" class="text-secondary"></small></div>
+
+        <div class="d-flex gap-2">
+
+          <button class="btn btn-outline-light btn-sm" onclick="prev()">&lsaquo;</button>
+
+          <button class="btn btn-outline-light btn-sm" onclick="next()">&rsaquo;</button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="background: rgba(16,40,78,.95); color:#fff;">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-id-card-clip me-2"></i>Detail Pengaduan</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body">
+          <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabPelanggan" type="button" role="tab">Detail Pelanggan</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabKet" type="button" role="tab">Keterangan</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabFoto" type="button" role="tab">Foto</button></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="tabPelanggan" role="tabpanel"><div id="pelangganTab"></div></div>
+            <div class="tab-pane fade" id="tabKet" role="tabpanel"><div id="ketTab"></div></div>
+            <div class="tab-pane fade" id="tabFoto" role="tabpanel"><div id="fotoTab"></div></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-light" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Teknisi Modal -->
+  <div class="modal fade" id="inputModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="background: rgba(16,40,78,.95); color:#fff;">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-file-circle-plus me-2"></i>Input Teknisi</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body">
+          <div id="inputAlert"></div>
+          <div class="row small text-secondary mb-2">
+            <div class="col-md-4">Tiket: <strong id="inTiketLabel">-</strong></div>
+            <div class="col-md-4">Jenis: <strong id="inJenisLabel">-</strong></div>
+            <div class="col-md-4">Nama: <strong id="inNamaLabel">-</strong></div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">TanggalKerja</label>
+              <input id="inTanggalKerja" type="datetime-local" class="form-control" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Diameter</label>
+              <select id="inDiameter" class="form-select">
+                <option value="">- Pilih Diameter -</option>
+                <option>½ inch</option>
+                <option>¾ inch</option>
+                <option>1 inch</option>
+                <option>2 inch</option>
+                <option>3 inch</option>
+                <option>4 inch</option>
+                <option>5 inch</option>
+                <option>6 inch</option>
+                <option>8 inch</option>
+                <option>10 inch</option>
+                <option>12 inch</option>
+                <option>14 inch</option>
+                <option>16 inch</option>
+                <option>18 inch</option>
+                <option>20 inch</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Penanggung jawab</label>
+              <select id="inPetugas1" class="form-select">
+                <option value="">-- Pilih Petugas --</option>
+                <option>rudi</option>
+                <option>Herman</option>
+                <option>Sopian</option>
+                <option>Andri</option>
+                <option>Badri</option>
+                <option>Agung</option>
+                <option>Redi</option>
+                <option>Heru</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Petugas <small class="text-secondary">(pilih lebih dari satu jika perlu)</small></label>
+              <div id="petugas2Group" class="d-flex flex-wrap gap-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="inPetugas2[]" id="p2_rudi" value="rudi">
+                  <label class="form-check-label" for="p2_rudi">rudi</label>
                 </div>
-                <small class="text-secondary d-block mt-1">Pilih dari Galeri atau ambil langsung dari Kamera.</small>
-                <div class="mt-2" id="previewSebelum"></div>
-              </div>
-              <div class="col-12">
-                <label class="form-label mb-1">Dokumentasi Sesudah Pekerjaan</label>
-                <input id="fotoSesudah" type="file" accept="image/*" class="form-control">
-                <div class="mt-2 d-flex flex-wrap gap-2">
-                  <button type="button" class="btn btn-sm btn-outline-info picker" data-for="fotoSesudah" data-mode="camera"><i class="fas fa-camera me-1"></i>Ambil dari Kamera</button>
-                  <button type="button" class="btn btn-sm btn-outline-light picker" data-for="fotoSesudah" data-mode="gallery"><i class="fas fa-image me-1"></i>Pilih dari Galeri</button>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="inPetugas2[]" id="p2_herman" value="Herman">
+                  <label class="form-check-label" for="p2_herman">Herman</label>
                 </div>
-                <small class="text-secondary d-block mt-1">Pilih dari Galeri atau ambil langsung dari Kamera.</small>
-                <div class="mt-2" id="previewSesudah"></div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="inPetugas2[]" id="p2_sopian" value="Sopian">
+                  <label class="form-check-label" for="p2_sopian">Sopian</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="inPetugas2[]" id="p2_andri" value="Andri">
+                  <label class="form-check-label" for="p2_andri">Andri</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="inPetugas2[]" id="p2_badri" value="Badri">
+                  <label class="form-check-label" for="p2_badri">Badri</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="inPetugas2[]" id="p2_agung" value="Agung">
+                  <label class="form-check-label" for="p2_agung">Agung</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="inPetugas2[]" id="p2_redi" value="Redi">
+                  <label class="form-check-label" for="p2_redi">Redi</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="inPetugas2[]" id="p2_heru" value="Heru">
+                  <label class="form-check-label" for="p2_heru">Heru</label>
+                </div>
               </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Pipa</label>
+              <select id="inPipa" class="form-select">
+                <option value="">- Pilih Jenis Pipa -</option>
+                <option>PVC</option>
+                <option>HDPE</option>
+                <option>ACP</option>
+                <option>STEEL</option>
+              </select>
+            </div>
+            <!-- Aksesori sebelum/sesudah diubah menjadi foto saja (lihat field di bawah) -->
+            <div class="col-12">
+              <label class="form-label">Aksesoris</label>
+              <input id="inAksesoris" class="form-control" placeholder="Contoh: Valve, Elbow, Socket (opsional)" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Foto Sebelum</label>
+              <input id="inFotoSblm" type="file" accept="image/*" class="form-control"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Foto Sesudah</label>
+              <input id="inFotoStlh" type="file" accept="image/*" class="form-control"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Foto Aksesoris Sebelum Perbaikan</label>
+              <input id="inFotoAksSblm" type="file" accept="image/*" class="form-control"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Foto Aksesoris Setelah Perbaikan</label>
+              <input id="inFotoAksStlh" type="file" accept="image/*" class="form-control"/>
             </div>
           </div>
         </div>
-
-        <div class="d-flex gap-2">
-          <button id="btnKirim" class="btn btn-brand" type="button">
-            <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
-            <span class="btn-text">Tandai Selesai</span>
-          </button>
-          <button id="btnReset" class="btn btn-outline-light" type="button">Reset</button>
+        <div class="modal-footer">
+          <button class="btn btn-outline-light" data-bs-dismiss="modal">Tutup</button>
+          <button id="btnSubmitInput" class="btn btn-brand" type="button">Kirim</button>
         </div>
-        <div class="mt-3" id="alertBox"></div>
       </div>
+    </div>
+  </div>
 
-      <div class="col-lg-5 order-1 order-lg-2" data-aos="fade-up" data-aos-delay="50">
-        <div class="card p-3">
-          <div class="card-header">Lokasi Penyelesaian</div>
-          <div class="card-body">
-            <button id="btnToggleMap" class="btn btn-outline-info btn-sm mb-2" type="button"><i class="fas fa-map-location-dot me-2"></i>Tampilkan Peta</button>
-            <div id="mapWrap">
-              <div id="map-tek"></div>
-            </div>
-            <div class="row g-2 mt-2">
-              <div class="col-6"><input id="lat" class="form-control" placeholder="Latitude"></div>
-              <div class="col-6"><input id="lng" class="form-control" placeholder="Longitude"></div>
-            </div>
-            <div class="mt-3 d-flex flex-wrap gap-2">
-              <button class="btn btn-primary" id="btnSetLoc" type="button"><i class="fas fa-location-crosshairs me-2"></i>Set dari Input</button>
-              <button class="btn btn-success" id="btnGeo" type="button"><i class="fas fa-location-arrow me-2"></i>Pakai Lokasi Saya</button>
-              <button class="btn btn-outline-light" id="btnClear" type="button"><i class="fas fa-undo me-2"></i>Reset</button>
-            </div>
-            <small class="text-secondary d-block mt-2">Klik peta untuk isi koordinat otomatis.</small>
+  <!-- Map picker for Input Modal -->
+  <div class="modal fade modal-fullscreen-sm-down" id="mapPickModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="background: rgba(16,40,78,.96); color:#e6f3ff;">
+        <div class="modal-header border-0">
+          <h5 class="modal-title"><i class="fas fa-location-dot me-2"></i>Pilih Lokasi</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body pt-0">
+          <div id="mapPick" style="height:70vh; border-radius:12px;"></div>
+          <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-success" id="btnMapUseGPS" type="button"><i class="fas fa-location-arrow me-2"></i>Pakai Lokasi Saya</button>
+            <button class="btn btn-primary ms-auto" id="btnMapSave" type="button"><i class="fas fa-check me-2"></i>Simpan Lokasi</button>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <footer>© 2025 PDAM Wilayah6 . All rights reserved.</footer>
+
+
+  <footer class="mt-4 text-center text-secondary">© 2025 Prumda Tirtawening wilayah 6.</footer>
+
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
   <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
   <script>AOS.init({duration:800, once:true});</script>
 
+  <!-- Leaflet for map picker -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // ====== KONFIG ENDPOINT ======
-    const GAS_URL = localStorage.getItem('cfg_gas') || "https://script.google.com/macros/s/AKfycbyfSbzjl6j6Ctd3YkOFnjtEId5Ouhc-Wfm6J2zDudogCAVyLQZjZgthBzw42S-bjxWNBw/exec";
-const TEKNISI_ENDPOINT = GAS_URL; // WAJIB: aktifkan kirim ke DataTeknisi
 
-    // ====== Helper UI ======
-    const alertBox = document.getElementById('alertBox');
-    function ensureToastWrap(){ let w=document.getElementById('toastWrap'); if(!w){ w=document.createElement('div'); w.id='toastWrap'; document.body.appendChild(w);} return w; }
-    function mapToastType(t){ t=String(t||'').toLowerCase(); return ({success:'success', danger:'danger', warning:'warning', info:'info'})[t]||'secondary'; }
-    function showToast(type, msg){ const wrap=ensureToastWrap(); const el=document.createElement('div'); el.className='toast align-items-center text-bg-'+mapToastType(type)+' border-0'; el.setAttribute('role','alert'); el.setAttribute('aria-live','assertive'); el.setAttribute('aria-atomic','true'); el.innerHTML = '<div class="d-flex"><div class="toast-body"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Tutup"></button></div>'; el.querySelector('.toast-body').textContent = msg; wrap.appendChild(el); const t=new bootstrap.Toast(el,{delay:3000}); t.show(); el.addEventListener('hidden.bs.toast', ()=> el.remove()); }
-    function alertMsg(type, html) { alertBox.innerHTML = '<div class="alert alert-'+type+'">'+html+'</div>'; const plain = html.replace(/<[^>]*>/g,''); showToast(type, plain); }
-    const btnKirim = document.getElementById('btnKirim');
-    const btnSpin  = btnKirim.querySelector('.spinner-border');
-    const btnText  = btnKirim.querySelector('.btn-text');
-    function setLoading(b) { btnKirim.disabled=b; btnSpin.classList.toggle('d-none', !b); btnText.textContent = b?'Mengirim...':'Tandai Selesai'; }
+    // === SET YOUR APPS SCRIPT DEPLOYMENT URL HERE ===
 
-    // ====== Waktu selesai ======
-    const waktu = document.getElementById('waktu');
-    function setWaktuNow(){ const d=new Date(); const pad=n=>String(n).padStart(2,'0'); waktu.value = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+' WIB'; }
-    setWaktuNow();
-    // Prefill nama teknisi dari login bila ada
-    const namaLogin = localStorage.getItem('teknisi_nama');
-    const emailLogin = localStorage.getItem('teknisi_email');
-    if (namaLogin && !document.getElementById('teknisi').value) {
-      document.getElementById('teknisi').value = namaLogin;
+    const GAS_URL = "https://script\.google\.com/macros/s/AKfycbynOkn3NJuJvI8oE1Cuy83rW479Tod7e1Go72pRRH5F04XLkVpbytAXG3ARg-ZuqTLm0Q/exec"; // TODO: ganti URL web app
+
+
+
+    const page = {idx:0, size:10};
+
+    let DATA = [];
+
+
+
+    async function fetchList(){
+
+      const url = GAS_URL + "?mode=aduan";
+
+      const resp = await fetch(url, { method: 'GET' });
+
+      const list = await resp.json();
+
+      // Map kolom sesuai appendRow di GAS:
+
+      // [Tiket, Tanggal, Jenis Keluhan, Nomor Pelanggan, Nama Pelanggan, Alamat, Kontak, Keterangan, Lokasi, Dokumentasi Pengaduan, Status]
+
+      // Flexible key picker to handle different sheet headers
+      const pickAny = (obj, keys)=>{
+        if(!obj) return '';
+        for(const k of keys){ if(obj[k] != null && String(obj[k]).trim() !== '') return obj[k]; }
+        const all = Object.keys(obj);
+        for(const k of keys){ const m = all.find(x => x.toLowerCase() === String(k).toLowerCase()); if(m && obj[m] != null && String(obj[m]).trim() !== '') return obj[m]; }
+        return '';
+      };
+
+      return list.map(o => ({
+
+        tiket  : pickAny(o, ["Tiket","No Tiket","tiket"]),
+
+        tanggal: pickAny(o, ["Tanggal","Waktu","Created At","tanggal"]),
+
+        jenis  : pickAny(o, ["Jenis Keluhan","Jenis","jenis"]),
+
+        nopel  : pickAny(o, ["Nomor Pelanggan","NomorPelanggan","No Pelanggan","NoLang","No Langganan","nolangganan","nolang"]),
+
+        nama   : pickAny(o, ["Nama Pelanggan","Nama","name","nama"]),
+
+        alamat : pickAny(o, ["Alamat","Address","alamat"]),
+
+        kontak : pickAny(o, ["Kontak","Nomor Kontak","NomorKontak","HP","No HP","Telepon","No Telp","No Telepon","phone","telp"]),
+
+        ket    : pickAny(o, ["Keterangan","Catatan","Deskripsi","keterangan"]),
+
+        lokasi : pickAny(o, ["Lokasi","Koordinat","latlng","lokasi"]),
+
+        foto   : pickAny(o, ["Dokumentasi Pengaduan","Dokumentasi","Foto","Gambar","dokumentasi"]),
+
+        status : pickAny(o, ["Status","status"]) || 'Baru'
+
+      }));
+
     }
 
-    // ====== Preview foto (sebelum & sesudah) ======
-    const fotoSebelum = document.getElementById('fotoSebelum');
-    const fotoSesudah = document.getElementById('fotoSesudah');
-    const previewSebelum = document.getElementById('previewSebelum');
-    const previewSesudah = document.getElementById('previewSesudah');
 
-    function setupPreview(input, previewBox, alt){
-      input.addEventListener('change', ()=>{
-        previewBox.innerHTML=''; const f=input.files[0]; if(!f) return;
-        const img=document.createElement('img'); img.className='thumb mt-2'; img.alt=alt;
-        const r=new FileReader(); r.onload=()=>img.src=r.result; r.readAsDataURL(f); previewBox.appendChild(img);
+
+    function badge(s){ return '<span class="badge badge-status '+s+'">'+s+'</span>'; }
+
+    function resetFilter(){ q.value=''; var fd=document.getElementById('fdate'); if(fd) fd.value=''; render(); }
+
+    function prev(){ if(page.idx>0){ page.idx--; render(); } }
+
+    function next(){
+
+      const total = filtered().length;
+
+      if((page.idx+1)*page.size < total){ page.idx++; render(); }
+
+    }
+
+    // Helpers for date filter (WIB)
+    function _parseDate(v){ try{ if(!v) return 0; var s=String(v).trim(); var d=new Date(s); if(!isNaN(d)) return d.getTime(); var m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return new Date(m[1]+'-'+m[2]+'-'+m[3]).getTime(); var m2=s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})/); if(m2) return new Date(m2[3]+'-'+m2[2]+'-'+m2[1]).getTime(); return 0; }catch(_){ return 0; } }
+    function _toDateKeyWIB(v){ try{ var ms=0; if(typeof v==='number') ms=v; else { ms=_parseDate(v); if(!ms&&v){ var d=new Date(String(v)); if(!isNaN(d)) ms=d.getTime(); } } if(!ms) return ''; var d=new Date(ms); var parts = new Intl.DateTimeFormat('id-ID',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:'Asia/Jakarta'}).formatToParts(d).reduce(function(a,p){a[p.type]=p.value;return a;},{}); var pad=function(s){return String(s).padStart(2,'0');}; return parts.year+'-'+pad(parts.month)+'-'+pad(parts.day); }catch(_){ return ''; } }
+
+    function filtered(){
+
+      const qv = (q.value||'').toLowerCase();
+
+      const fdEl = document.getElementById('fdate');
+      const fdate = (fdEl && fdEl.value) ? String(fdEl.value) : '';
+
+      return DATA.filter(r=>{
+        // Sembunyikan yang status sudah Proses (khusus view teknisi/non-admin)
+        const st = String(r.status||'').toLowerCase();
+        if (st === 'proses') return false;
+
+        const hit = (r.nama||'').toLowerCase().includes(qv) || (r.alamat||'').toLowerCase().includes(qv) || (r.tiket||'').toLowerCase().includes(qv) || (r.jenis||'').toLowerCase().includes(qv);
+
+        const dOK = !fdate || _toDateKeyWIB(r.tanggal) === fdate;
+
+        return hit && dOK;
+
       });
-    }
-    setupPreview(fotoSebelum, previewSebelum, 'Preview sebelum pekerjaan');
-    setupPreview(fotoSesudah, previewSesudah, 'Preview sesudah pekerjaan');
 
-    // ====== Camera/Gallery pickers ======
-    document.querySelectorAll('button.picker[data-for][data-mode]').forEach(btn=>{
-      btn.addEventListener('click', () => {
-        const id = btn.getAttribute('data-for');
-        const mode = btn.getAttribute('data-mode');
-        const inp = document.getElementById(id);
-        if (!inp) return;
-        try{
-          if (mode === 'camera') inp.setAttribute('capture','environment'); else inp.removeAttribute('capture');
-          inp.click();
-        }catch{}
-      });
-    });
-    // After selection, remove capture to avoid forcing camera next time unintentionally
-    ['fotoSebelum','fotoSesudah'].forEach(id=>{
-      const el = document.getElementById(id);
-      if (el) el.addEventListener('change', ()=>{ el.removeAttribute('capture'); });
-    });
-
-    // ====== Leaflet Map (lazy init + toggle) ======
-    let map=null, marker=null;
-    const elLat=document.getElementById('lat'), elLng=document.getElementById('lng');
-    const mapWrap = document.getElementById('mapWrap');
-    const btnToggleMap = document.getElementById('btnToggleMap');
-    const isMobile = window.matchMedia('(max-width: 576px)').matches;
-
-    function initMap(){
-      if (map || typeof L==='undefined') return;
-      map=L.map('map-tek',{zoomControl:true, preferCanvas:true}).setView([-6.9147,107.6098],12);
-      const providers=[{u:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',o:{maxZoom:19}},{u:'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',o:{maxZoom:20}}];
-      let tl=L.tileLayer(providers[0].u,providers[0].o).addTo(map);
-      tl.on('tileerror',()=>{ map.removeLayer(tl); tl=L.tileLayer(providers[1].u,providers[1].o).addTo(map); });
-      map.on('click', e=>setPoint(e.latlng.lat,e.latlng.lng,false));
-      // Ensure proper size after becoming visible
-      setTimeout(()=>{ try{ map.invalidateSize(); }catch(_){} }, 0);
     }
 
-    function setPoint(lat,lng,zoom=true){
-      const pos=[lat,lng];
-      elLat.value=Number(lat).toFixed(6);
-      elLng.value=Number(lng).toFixed(6);
-      if(!map) return;
-      if(!marker) marker=L.marker(pos).addTo(map); else marker.setLatLng(pos);
-      if(zoom) map.setView(pos, Math.max(map.getZoom(),16));
-    }
 
-    function showMap(){ if (mapWrap){ mapWrap.style.display='block'; } if(btnToggleMap){ btnToggleMap.innerHTML='<i class="fas fa-eye-slash me-2"></i>Sembunyikan Peta'; }
-      if (!map) { initMap(); } else { setTimeout(()=>{ try{ map.invalidateSize(); }catch(_){} }, 0); }
-    }
-    function hideMap(){ if (mapWrap){ mapWrap.style.display='none'; } if(btnToggleMap){ btnToggleMap.innerHTML='<i class="fas fa-map-location-dot me-2"></i>Tampilkan Peta'; } }
 
-    if (btnToggleMap){
-      btnToggleMap.addEventListener('click', ()=>{
-        const hidden = mapWrap && getComputedStyle(mapWrap).display==='none';
-        if (hidden) showMap(); else hideMap();
-      });
-    }
+    async function setStatus(tiket, status){
 
-    // Desktop: init immediately, Mobile: wait for toggle/interaction
-    if (!isMobile && typeof L!=='undefined') { initMap(); }
+      if(!confirm('Ubah status tiket '+tiket+' menjadi '+status+'?')) return;
 
-    // Hook up controls; ensure map is visible on interaction
-    const btnSetLoc = document.getElementById('btnSetLoc');
-    const btnClear  = document.getElementById('btnClear');
-    const btnGeo    = document.getElementById('btnGeo');
-    if (btnSetLoc) btnSetLoc.addEventListener('click',()=>{
-      if (isMobile) showMap();
-      if (!map) initMap();
-      const la=parseFloat(elLat.value), lo=parseFloat(elLng.value);
-      if(!Number.isFinite(la)||!Number.isFinite(lo)) return alert('Isi latitude/longitude valid.');
-      setPoint(la,lo,true);
-    });
-    if (btnClear) btnClear.addEventListener('click',()=>{
-      elLat.value=''; elLng.value='';
-      if(marker&&map){ map.removeLayer(marker); marker=null; }
-      if(map) map.setView([-6.9147,107.6098],12);
-    });
-    if (btnGeo) btnGeo.addEventListener('click',()=>{
-      if (isMobile) showMap();
-      if (!navigator.geolocation) return alert('Geolocation tidak didukung.');
-      navigator.geolocation.getCurrentPosition(p=>{
-        if (!map) initMap();
-        setPoint(p.coords.latitude,p.coords.longitude,true);
-      }, e=>{ console.error(e); alert('Gagal ambil lokasi.'); }, {enableHighAccuracy:true,timeout:8000,maximumAge:0});
-    });
-
-    // ====== Utils ======
-    function toDataURL(file){ return new Promise((res,rej)=>{ if(!file) return res(''); const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
-    function resetForm(){ ['tiket','teknisi','tim','catatan'].forEach(id=>document.getElementById(id).value='');
-      if (fotoSebelum) fotoSebelum.value=''; if (previewSebelum) previewSebelum.innerHTML='';
-      if (fotoSesudah) fotoSesudah.value=''; if (previewSesudah) previewSesudah.innerHTML='';
-      if (elLat) elLat.value=''; if (elLng) elLng.value='';
-      if(marker&&map){map.removeLayer(marker); marker=null;} if(map) map.setView([-6.9147,107.6098],12);
-      if (isMobile) hideMap();
-      setWaktuNow(); }
-
-    // ====== Submit ======
-    async function submitTeknisi(){
-      const tiket=document.getElementById('tiket').value.trim();
-      const teknisi=document.getElementById('teknisi').value.trim();
-      const tim=document.getElementById('tim').value.trim();
-      const catatan=document.getElementById('catatan').value.trim();
-      const la=elLat.value.trim(), lo=elLng.value.trim();
-      const lokasi=(la&&lo)?(la+','+lo):'';
-      if(!tiket){ alertMsg('warning','Nomor tiket wajib diisi.'); return; }
-      // Validasi wajib koordinat + foto dokumentasi (sebelum & sesudah)
-      const latNum = parseFloat(la), lngNum = parseFloat(lo);
-      const fileSebelum = (fotoSebelum && fotoSebelum.files[0]) || null;
-      const fileSesudah = (fotoSesudah && fotoSesudah.files[0]) || null;
-      if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)){
-        alertMsg('warning','Koordinat lokasi wajib diisi. Gunakan tombol "Pakai Lokasi Saya" atau klik peta.');
-        return;
-      }
-      if (!fileSebelum || !fileSesudah){
-        alertMsg('warning','Lengkapi foto dokumentasi: sebelum & sesudah.');
-        return;
-      }
-
-      setLoading(true); alertMsg('info','Mengirim...');
       try{
-        // 1) update status ke Proses (menunggu verifikasi admin)
-        const respUpd = await fetch(GAS_URL+'?mode=update&tiket='+encodeURIComponent(tiket)+'&status='+encodeURIComponent('Proses'));
-        const jUpd = await respUpd.json();
-        if (jUpd.status!=='success'){ setLoading(false); return alertMsg('danger','Gagal update status tiket.'); }
 
-        // 2) opsional: kirim detail teknisi jika endpoint ada
-        if (TEKNISI_ENDPOINT){
-          const dokumentasi_sebelum = await toDataURL(fileSebelum);
-          const dokumentasi_sesudah = await toDataURL(fileSesudah);
-          // Keep backward compatibility: 'dokumentasi' = sesudah
-          const payload = new URLSearchParams({ mode:'teknisi_selesai', tiket, teknisi, tim, catatan, lokasi, waktu:waktu.value, dokumentasi: dokumentasi_sesudah });
-          payload.append('dokumentasi_sebelum', dokumentasi_sebelum);
-          payload.append('dokumentasi_sesudah', dokumentasi_sesudah);
-          await fetch(TEKNISI_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body: payload.toString() });
+        const url = GAS_URL + "?mode=update&tiket=" + encodeURIComponent(tiket) + "&status=" + encodeURIComponent(status);
+
+        const resp = await fetch(url, { method: 'GET' });
+
+        const json = await resp.json();
+
+        if(json.status==='success'){
+
+          await loadAndRender();
+
+        }else{
+
+          alert('Gagal update status: ' + (json.message||'Unknown'));
+
         }
 
-        alertMsg('success','Tiket <strong>'+tiket+'</strong> ditandai <strong>Proses</strong> (menunggu verifikasi admin). Data teknisi tersimpan. Menyegarkan halaman...');
-        resetForm();
-        setTimeout(()=>{ location.reload(); }, 1200);
       }catch(err){
+
         console.error(err);
-        alertMsg('danger','Gagal mengirim. Cek koneksi & endpoint.');
-      }finally{
-        setLoading(false);
+
+        // Hindari alert blocking; tampilkan pesan ringan di bawah tabel
+        try{
+          var info = document.getElementById('countInfo');
+          if(info){ info.classList.add('text-danger'); info.textContent = 'Gagal memuat data. Periksa koneksi/GAS, lalu klik Refresh.'; }
+        }catch(_){ /* ignore */ }
+
       }
+
     }
 
-    document.getElementById('btnKirim').addEventListener('click', submitTeknisi);
-    document.getElementById('btnReset').addEventListener('click', resetForm);
 
-    // Muat daftar tiket (Baru/Proses) ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ opsi pilihan
-    async function loadTickets() {
-      const sel = document.getElementById('tiket');
-      sel.innerHTML = '<option value="">Memuat daftar...</option>';
-      try {
-        const resp = await fetch(GAS_URL + '?mode=aduan');
-        const list = await resp.json();
-        // petakan minimal field + tanggal untuk sorting
-        const rows = (Array.isArray(list) ? list : (list.data||[])).map(o=>({
-          tiket: o["Tiket"],
-          status: o["Status"],
-          nama: o["Nama Pelanggan"],
-          alamat: o["Alamat"],
-          tanggal: o["Tanggal"]
-        }));
-        // helper parse tanggal sederhana
-        const parseDate = (v)=>{
-          if(!v) return 0; const s=String(v).trim(); const d=new Date(s); if(!isNaN(d)) return d.getTime();
-          const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return new Date(`${m[1]}-${m[2]}-${m[3]}`).getTime();
-          const m2=s.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})/); if(m2) return new Date(`${m2[3]}-${m2[2]}-${m2[1]}`).getTime();
-          return 0;
+
+    function render(){
+
+      const rows = filtered();
+
+      const start = page.idx*page.size;
+
+      const items = rows.slice(start, start+page.size);
+
+      tb.innerHTML = items.map((r,i)=>`
+
+        <tr>
+
+          <td>${start+i+1}</td>
+
+          <td><strong>${r.tiket||''}</strong></td>
+
+          <td>${r.tanggal||''}</td>
+
+          <td>${r.nama||''}</td>
+
+          <td>${r.kontak||''}</td>
+
+          
+
+          <td>${r.lokasi?`<a href="https://www.google.com/maps?q=${encodeURIComponent(r.lokasi)}" target="_blank">ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â</a>`:''}</td>
+
+          
+
+        </tr>
+
+      `).join('');
+      // Override with custom columns and make tiket clickable to open detail
+      try{
+        (function(){
+          var rowsX = filtered();
+          var startX = page.idx * page.size;
+          var itemsX = rowsX.slice(startX, startX + page.size);
+          var EH = function(s){ s = (s==null?'':String(s)); return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;'); };
+          var html = '';
+          var parseDate = function(v){ try{ if(!v) return 0; var s=String(v).trim(); var d=new Date(s); if(!isNaN(d)) return d.getTime(); var m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return new Date(m[1]+'-'+m[2]+'-'+m[3]).getTime(); var m2=s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})/); if(m2) return new Date(m2[3]+'-'+m2[2]+'-'+m2[1]).getTime(); return 0; }catch(_){ return 0; } };
+          var fmtWIB = function(v){ try{ var ms=0; if(typeof v==='number') ms=v; else { ms=parseDate(v); if(!ms&&v){ var d=new Date(String(v)); if(!isNaN(d)) ms=d.getTime(); } } if(!ms) return (v||''); var d=new Date(ms); var parts = new Intl.DateTimeFormat('id-ID',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Jakarta'}).formatToParts(d).reduce(function(a,p){a[p.type]=p.value;return a;},{}); var pad=function(s){return String(s).padStart(2,'0');}; return parts.year+'-'+pad(parts.month)+'-'+pad(parts.day)+' '+pad(parts.hour)+':'+pad(parts.minute)+' WIB'; }catch(_){ return (v||''); } };
+          for (var ii=0; ii<itemsX.length; ii++){ var r = itemsX[ii]||{}; html += '<tr>'
+            + '<td>'+ (startX+ii+1) +'</td>'
+            + '<td><a href="#" class="open-detail" data-idx="'+ (startX+ii) +'"><strong>'+
+              EH((function(s){ try{ var str=String(s||''); var m=str.match(/^(.*?)(\d+)(\D*)$/); if(!m) return str; var pref=m[1]||''; var num=m[2]||''; var suf=m[3]||''; return pref + String(num).padStart(6,'0') + suf; }catch(_){ return s||''; } })(r.tiket||''))
+              +'</strong></a></td>'
+            + '<td>'+ EH(fmtWIB(r.tanggal||'')) +'</td>'
+            + '<td>'+ EH(r.nama||'') +'</td>'
+            + '<td>'+ EH(r.kontak||'') +'</td>'
+            + '<td>'+ (r.lokasi?('<a href="https://www.google.com/maps?q='+ encodeURIComponent(String(r.lokasi)) +'" target="_blank" rel="noopener">'+ EH(r.lokasi) +'</a>'):'') +'</td>'
+          + '</tr>'; }
+          tb.innerHTML = html;
+          tb.querySelectorAll('.open-detail').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); var idx = Number(a.getAttribute('data-idx'))||0; openInputFromRow(idx); }); });
+        })();
+      }catch(_){}
+
+      countInfo.classList.remove('text-danger');
+      countInfo.classList.add('text-secondary');
+      countInfo.textContent = `Menampilkan ${rows.length?start+1:0}-${Math.min(start+page.size, rows.length)} dari ${rows.length} tiket`;
+      try{ rewriteRows(); }catch(e){ }
+
+    }
+
+
+
+    async function loadAndRender(){
+
+      try{
+
+        DATA = await fetchList();
+
+        // Urutkan berdasarkan angka pada kolom Tiket (menaik)
+        const _ticketNum = (t)=>{
+          try{
+            const m = String(t||'').match(/\d+/g);
+            return m ? parseInt(m[m.length-1], 10) : Number.MAX_SAFE_INTEGER;
+          }catch{ return Number.MAX_SAFE_INTEGER; }
         };
-        // filter hanya tiket tanpa status/Baru
-        const eligible = rows.filter(r => {
-          if (!r.tiket) return false;
-          const s = String(r.status||'').trim().toLowerCase();
-          return s === '' || s === 'baru';
-        });
-        eligible.sort((a,b)=> parseDate(b.tanggal) - parseDate(a.tanggal));
-        const limited = eligible.slice(0,5);
-        const options = limited.map(r => ({ value: r.tiket, label: r.tiket + (r.nama?(' - '+r.nama):'') }));
-        sel.innerHTML = '<option value="">Pilih tiket dari daftar</option>' +
-          options.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+        DATA.sort((a,b)=> _ticketNum(a.tiket) - _ticketNum(b.tiket));
 
-        // Prefill dari query bila ada
-        const tk = new URLSearchParams(location.search).get('tiket');
-        if (tk) {
-          // jika tk tidak ada di options, tambahkan sementara agar bisa terpilih
-          if (![...sel.options].some(op => op.value===tk)) {
-            const opt = document.createElement('option'); opt.value=tk; opt.textContent=tk+' (manual)'; sel.appendChild(opt);
+        page.idx = 0;
+
+        render();
+
+      }catch(err){
+
+        console.error(err);
+
+        // Jangan tampilkan alert; update info area secara halus
+        try{
+          var info = document.getElementById('countInfo');
+          if(info){
+            info.classList.remove('text-secondary');
+            info.classList.add('text-danger');
+            info.textContent = 'Gagal memuat data. Coba klik Refresh.';
           }
-          sel.value = tk;
-        }
-      } catch (e) {
-        sel.innerHTML = '<option value="">Gagal memuat daftar tiket</option>';
+        }catch(_){ /* ignore */ }
+
       }
+
     }
 
-    loadTickets();
-  });
+
+
+    loadAndRender();
+
+    // Smooth Refresh button behavior
+    (function(){
+      var btn = document.getElementById('btnRefreshList');
+      var wrap = document.getElementById('aduanTableWrap');
+      if(!btn) return;
+      btn.addEventListener('click', async function(){
+        try{
+          btn.disabled = true; var old = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refresh';
+          if(wrap){ wrap.style.transition='opacity .25s'; wrap.style.opacity='0.5'; }
+          await loadAndRender();
+        }catch(e){ console.error(e); }
+        finally{
+          if(wrap){ wrap.style.opacity='1'; }
+          btn.disabled = false; btn.innerHTML = '<i class="fas fa-rotate"></i> Refresh';
+        }
+      });
+    })();
+
+    // Input Pengaduan modal behavior
+    (function(){
+      var modalEl = document.getElementById('inputModal');
+      var submitBtn = document.getElementById('btnSubmitInput');
+      if(!modalEl || !submitBtn) return;
+      var modal = new bootstrap.Modal(modalEl);
+      // Prefill TanggalKerja default
+      try{ var now=new Date(); var pad=s=>String(s).padStart(2,'0'); var v=now.getFullYear()+"-"+pad(now.getMonth()+1)+"-"+pad(now.getDate())+"T"+pad(now.getHours())+":"+pad(now.getMinutes()); var tEl=document.getElementById('inTanggalKerja'); if(tEl && !tEl.value) tEl.value=v; }catch{}
+      function toDataURL(file){ return new Promise(function(resolve,reject){ if(!file) return resolve(""); var r=new FileReader(); r.onload=function(){ resolve(r.result); }; r.onerror=reject; r.readAsDataURL(file); }); }
+      function setMsg(type, msg){ var box=document.getElementById('inputAlert'); if(box){ box.innerHTML='<div class="alert alert-'+type+'">'+msg+'</div>'; } }
+      // helper to clear all input fields in modal
+      function _clearInputForm(){
+        try{
+          ['inTanggalKerja','inDiameter','inPipa','inAksesOblm','inAksesOstlh','inAksesoris'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+          // reset petugas fields
+          var s1=document.getElementById('inPetugas1'); if(s1) s1.selectedIndex=0;
+          try{ document.querySelectorAll('input[name="inPetugas2[]"]').forEach(function(cb){ cb.checked = false; }); }catch(_){ }
+          var sD=document.getElementById('inDiameter'); if(sD) sD.selectedIndex=0;
+          var sP=document.getElementById('inPipa'); if(sP) sP.selectedIndex=0;
+          var f1=document.getElementById('inFotoSblm'); if(f1) f1.value='';
+          var f2=document.getElementById('inFotoStlh'); if(f2) f2.value='';
+          var f3=document.getElementById('inFotoAksSblm'); if(f3) f3.value='';
+          var f4=document.getElementById('inFotoAksStlh'); if(f4) f4.value='';
+          var p1=document.getElementById('inPetugas1'); if(p1) p1.focus();
+        }catch(e){ console.warn('clear form fail', e); }
+      }
+
+      submitBtn.addEventListener('click', async function(){
+        try{
+          submitBtn.disabled=true; var old=submitBtn.innerHTML; submitBtn.innerHTML='<i class="fas fa-spinner fa-spin me-1"></i>Kirim...';
+          var tgl   =(document.getElementById('inTanggalKerja').value||'').trim();
+          var pet1  = (document.getElementById('inPetugas1').value||'').trim();
+          var pet2  = (function(){ try{ return Array.from(document.querySelectorAll('input[name="inPetugas2[]"]:checked')).map(function(el){return el.value;}).join(', '); }catch(_){ return (document.getElementById('inPetugas2')||{}).value||''; } })().trim();
+          var diam  =(document.getElementById('inDiameter').value||'').trim();
+          var pipa  =(document.getElementById('inPipa').value||'').trim();
+          var aks   =(document.getElementById('inAksesoris').value||'').trim();
+          if(!tgl || !pet1){ setMsg('warning','TanggalKerja dan Petugas1 wajib diisi.'); return; }
+          var fSblm = (document.getElementById('inFotoSblm')||{}).files ? document.getElementById('inFotoSblm').files[0] : null;
+          var fStlh = (document.getElementById('inFotoStlh')||{}).files ? document.getElementById('inFotoStlh').files[0] : null;
+          var fAksS = (document.getElementById('inFotoAksSblm')||{}).files ? document.getElementById('inFotoAksSblm').files[0] : null;
+          var fAksT = (document.getElementById('inFotoAksStlh')||{}).files ? document.getElementById('inFotoAksStlh').files[0] : null;
+          var dataSblm = await toDataURL(fSblm);
+          var dataStlh = await toDataURL(fStlh);
+          var dataAksS = await toDataURL(fAksS);
+          var dataAksT = await toDataURL(fAksT);
+          var payload = new URLSearchParams({ TanggalKerja:tgl, Petugas1:pet1, Petugas2:pet2, Diameter:diam, Pipa:pipa, aksesoris:aks });
+          if(dataSblm) payload.append('Fotosblm', dataSblm);
+          if(dataStlh) payload.append('Fotostlah', dataStlh);
+          if(dataAksS) payload.append('ftoaksoblmbaikan', dataAksS);
+          if(dataAksT) payload.append('ftoaksostlhbaikan', dataAksT);
+          var tclick = '';
+          try{ tclick = submitBtn.getAttribute('data-tiket')||''; if(tclick) payload.append('tiket', tclick); }catch(_){ }
+          // Explicit mode to avoid creating pengaduan entry
+          try{ payload.append('mode','teknisi_selesai'); }catch(_){ }
+          setMsg('info','Mengirim...');
+          var resp = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body: payload.toString() });
+          var json = await resp.json();
+          if(json.status==='success' || json.status==='ok'){
+            // Tandai tiket sebagai Proses (admin yang menyelesaikan)
+            try{ if(tclick){ await fetch(GAS_URL + '?mode=update&tiket=' + encodeURIComponent(tclick) + '&status=' + encodeURIComponent('Proses')); } }catch(_){ }
+            setMsg('success','Data teknisi tersimpan. Status tiket diubah ke Proses. '+ (tclick?('Tiket: <strong>'+tclick+'</strong>'):'') + '<br><small>Form telah direset. Silakan input berikutnya.</small>');
+            _clearInputForm();
+            loadAndRender();
+          }else{
+            setMsg('danger','Gagal: '+(json.message||'Unknown error'));
+          }
+        }catch(e){ console.error(e); setMsg('danger','Gagal mengirim: '+e.message); }
+        finally{ submitBtn.disabled=false; submitBtn.innerHTML='Kirim'; }
+      });
+    })();
+
+    // Detail modal utilities
+    function _esc(s){ s=(s==null?'':String(s)); return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;'); }
+    function _normalizeDrive(u){
+      try{
+        var url = new URL(u);
+        if(url.hostname.indexOf('drive.google.com')>-1){
+          var m = url.pathname.match(/\/file\/d\/([^/]+)\//);
+          if(m && m[1]) return 'https://drive.google.com/uc?export=view&id='+m[1];
+          var id = url.searchParams.get('id');
+          if(id) return 'https://drive.google.com/uc?export=view&id='+id;
+        }
+        // drive.usercontent.google.com download?id=... -> normalize to drive uc view
+        if(url.hostname.indexOf('drive.usercontent.google.com')>-1 || /(^|\.)googleusercontent\.com$/i.test(url.hostname)){
+          var id2 = url.searchParams.get('id');
+          if(id2) return 'https://drive.google.com/uc?export=view&id='+id2;
+        }
+        // pass-through others (e.g., lh3.googleusercontent.com direct image)
+        return u;
+      }catch(e){ return u; }
+    }
+    function _parsePhotos(str){
+      if(!str) return [];
+      var hrefs=Array.from(String(str).matchAll(/href\s*=\s*\"([^\"]+)\"/ig)).map(function(m){return m[1];});
+      var base=hrefs.length?hrefs.join(','):String(str);
+      var arr = base.split(/\s*[,\n;]\s*|\s{2,}/).map(function(s){return s.trim();}).filter(Boolean);
+      var out=[]; for(var i=0;i<arr.length;i++){ var n=_normalizeDrive(arr[i]); if(/^https?:\/\//i.test(n)) out.push(n); }
+      // dedupe
+      return Array.from(new Set(out));
+    }
+    function openDetail(idx){
+      try{
+        var rows = filtered();
+        var r = rows[idx] || {};
+        var fotos = _parsePhotos(r.foto||'');
+        var fotoHtml = fotos.length ? '<div class="photo-grid">'+fotos.map(function(u){return '<a href="'+u+'" target="_blank" rel="noopener"><img src="'+u+'" alt="Foto"/></a>';}).join('')+'</div>' : '<em class="text-secondary">Tidak ada foto</em>';
+        var pelangganHtml = '<table class="table table-dark table-sm mb-0"><tbody>'
+          + '<tr><td class="col-fit">Tiket</td><td><strong>'+ (function(s){ try{ var str=String(s||''); var m=str.match(/^(.*?)(\d+)(\D*)$/); if(!m) return _esc(str||'-'); var pref=m[1]||''; var num=m[2]||''; var suf=m[3]||''; return _esc(pref + String(num).padStart(6,'0') + suf); }catch(_){ return _esc(s||'-'); } })(r.tiket) +'</strong></td></tr>'
+          + '<tr><td>Nama</td><td>'+_esc(r.nama||'-')+'</td></tr>'
+          + '<tr><td>No. Langganan</td><td>'+_esc(r.nopel||'-')+'</td></tr>'
+          + '<tr><td>Alamat</td><td>'+_esc(r.alamat||'-')+'</td></tr>'
+          + '<tr><td>Kontak</td><td>'+_esc(r.kontak||'-')+'</td></tr>'
+          + '<tr><td>Jenis</td><td>'+_esc(r.jenis||'-')+'</td></tr>'
+          + '<tr><td>Tanggal</td><td>'+_esc(r.tanggal||'-')+'</td></tr>'
+          + '</tbody></table>';
+        var ketHtml = '<div class="p-2">'+(_esc(r.ket||'').replace(/\n/g,'<br>')||'<em class="text-secondary">Tidak ada keterangan</em>')+'</div>';
+        document.getElementById('pelangganTab').innerHTML = pelangganHtml;
+        document.getElementById('ketTab').innerHTML = ketHtml;
+        document.getElementById('fotoTab').innerHTML = fotoHtml;
+        // fallback: jika gambar gagal load, tampilkan tombol buka link
+        setTimeout(function(){
+          document.querySelectorAll('#fotoTab .photo-grid img').forEach(function(img){
+            img.addEventListener('error', function(){
+              var u = img.getAttribute('src')||'#';
+              var a = document.createElement('a'); a.href=u; a.target='_blank'; a.rel='noopener'; a.className='btn btn-sm btn-outline-light w-100'; a.textContent='Buka Link Foto'; img.replaceWith(a);
+            }, { once:true });
+          });
+        },0);
+        var modal = new bootstrap.Modal(document.getElementById('detailModal'));
+        modal.show();
+      }catch(e){ console.error(e); }
+    }
+
+    // Open input modal (pekerjaan) from selected row
+    function openInputFromRow(idx){
+      try{
+        var r = filtered()[idx] || {};
+        var modalEl = document.getElementById('inputModal'); var modal = new bootstrap.Modal(modalEl);
+        // prefill fields
+        var setVal = function(id, v){ var el=document.getElementById(id); if(el) el.value = v||''; };
+        setVal('inNama', r.nama||'');
+        setVal('inNopel', r.nopel||'');
+        setVal('inAlamat', r.alamat||'');
+        setVal('inKontak', r.kontak||'');
+        var jEl = document.getElementById('inJenis'); if(jEl){ try{ jEl.value = r.jenis||jEl.value; }catch{} }
+        var tLab = document.getElementById('inTiketLabel'); if(tLab) tLab.textContent = r.tiket||'-';
+        var jLab = document.getElementById('inJenisLabel'); if(jLab) jLab.textContent = r.jenis||'-';
+        var nLab = document.getElementById('inNamaLabel'); if(nLab) nLab.textContent = r.nama||'-';
+        // store tiket in dataset on submit button
+        var submitBtn = document.getElementById('btnSubmitInput'); if(submitBtn){ submitBtn.setAttribute('data-tiket', r.tiket||''); }
+        // clear lokasi/foto
+        setVal('inLat',''); setVal('inLng',''); var sL=document.getElementById('inLatStat'); if(sL) sL.textContent='-'; var sG=document.getElementById('inLngStat'); if(sG) sG.textContent='-'; var sA=document.getElementById('inAccStat'); if(sA) sA.textContent='-'; var f=document.getElementById('inFoto'); if(f) f.value='';
+        var aBox=document.getElementById('inputAlert'); if(aBox) aBox.innerHTML='';
+        modal.show();
+      }catch(e){ console.error(e); }
+    }
+
   </script>
+
   <!-- Mobile Bottom Nav (visible only on small screens) -->
   <nav class="mobile-nav d-sm-none">
     <a href="index.html" class="active" aria-label="Home"><i class="fas fa-house"></i></a>
@@ -438,4 +806,8 @@ const TEKNISI_ENDPOINT = GAS_URL; // WAJIB: aktifkan kirim ke DataTeknisi
   </nav>
 
 </body>
+
 </html>
+
+
+

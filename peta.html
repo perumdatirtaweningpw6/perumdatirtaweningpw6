@@ -95,19 +95,10 @@
 
     .badge-status.Selesai{ background:#28a745; }
 
-    .legend{ background:#fff; color:#000; padding:8px 10px; border-radius:8px; box-shadow: 0 2px 8px rgba(0,0,0,.25); line-height:1.4; }
-
-    /* Sidebar legend list */
-
-    .legend-list { display:block; max-height:28vh; overflow:auto; padding:6px; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:10px; }
-
-    .legend-item { display:flex; align-items:center; gap:8px; color:#cfe9ff; font-size:12px; padding:4px 2px; }
-
-    .legend-swatch { width:14px; height:14px; border-radius:4px; border:1px solid rgba(0,0,0,.35); flex:0 0 auto; }
+    /* Legend removed */
 
     /* DMA polygon label */
 
-    .leaflet-tooltip.dma-label { background: rgba(255,255,255,.85); border: 1px solid rgba(0,0,0,.2); box-shadow: 0 2px 6px rgba(0,0,0,.25); color:#111; font-weight:700; padding:2px 6px; border-radius:6px; pointer-events: none; }
 
     /* Popup container restyle (no more flat white) */
 
@@ -193,7 +184,7 @@
       .tabs{ gap:8px; padding:10px 12px; background: transparent; border-bottom:1px solid rgba(255,255,255,.08); position: sticky; top:0; z-index:2; backdrop-filter: blur(6px); }
       .tabs .tbtn{ padding:10px; font-size:14px; border-radius:12px; }
       .pane{ padding:12px; height: calc(68vh - 56px); overflow:auto; }
-      .legend-list{ max-height: 28vh; }
+      /* legend removed */
 
       /* Collapse state: show only the tab bar */
       .app.sidebar-collapsed .right{ transform: translateY(calc(100% - 56px)); }
@@ -209,10 +200,7 @@
       /* Hide Map FAB when fullscreen-like mode is active */
       .fs-on .fab-map{ display:none !important; }
 
-      /* Tables: keep only essential columns */
-      .table-aduan th:nth-child(3), .table-aduan td:nth-child(3), /* Tanggal */
-      .table-aduan th:nth-child(5), .table-aduan td:nth-child(5), /* Jenis */
-      .table-aduan th:nth-child(7), .table-aduan td:nth-child(7)  /* Lok */{ display:none; }
+      /* Tables: keep compact layout on mobile */
       .table-aduan th, .table-aduan td{ white-space: nowrap; }
 
       .card-soft{ padding:10px; }
@@ -246,10 +234,13 @@
     .arrears-badge i{font-style:normal}
 
     .arrears-dot{width:10px;height:10px;border-radius:50%;background:#e53935;box-shadow:0 0 8px #e53935aa;display:inline-block}
+    /* DMA text label style */
+    .dma-label{ color:rgba(0,0,0,.65); font-weight:500; font-size:11px; background:transparent; text-shadow:none; pointer-events:none; }
 
   </style>
 
   <link rel="stylesheet" href="css/responsive.css" />
+  
   
   
   </head>
@@ -286,19 +277,19 @@
 
       <div class="tabs">
 
-        <div class="tbtn active" data-pane="pane-aduan"><i class="fa-solid fa-list"></i></div>
+        <div class="tbtn active" data-pane="pane-layers"><i class="fa-solid fa-layer-group"></i></div>
+
+        <div class="tbtn" data-pane="pane-aduan"><i class="fa-solid fa-list"></i></div>
 
         <div class="tbtn" data-pane="pane-search"><i class="fa-solid fa-magnifying-glass"></i></div>
 
         <div class="tbtn" data-pane="pane-logger"><i class="fa-solid fa-gauge"></i></div>
 
-        <div class="tbtn" data-pane="pane-layers"><i class="fa-solid fa-layer-group"></i></div>
-
       </div>
 
 
 
-      <section id="pane-aduan" class="pane active">
+      <section id="pane-aduan" class="pane">
 
         <div class="card-soft mb-2">
 
@@ -342,6 +333,8 @@
 
         </div>
 
+        
+
 
 
         <div class="card-soft">
@@ -354,7 +347,7 @@
 
                 <tr>
 
-                  <th>#</th><th>Tiket</th><th>Tanggal</th><th>Nama</th><th>Jenis</th><th>Status</th><th>Lok</th><th>Lihat</th>
+                  <th>#</th><th>Tiket</th><th>Tanggal</th><th>Nama</th><th>Lihat</th>
 
                 </tr>
 
@@ -428,7 +421,7 @@
 
 
 
-      <section id="pane-layers" class="pane">
+      <section id="pane-layers" class="pane active">
 
         <div class="card-soft">
 
@@ -449,60 +442,32 @@
           </div>
 
           <div class="form-check mb-1">
-
-            <input class="form-check-input" type="checkbox" id="chkPelanggan" checked>
-
+            <input class="form-check-input" type="checkbox" id="chkPelanggan">
             <label for="chkPelanggan" class="form-check-label">Pelanggan</label>
-
           </div>
 
           <div class="form-check mb-1">
-
-            <input class="form-check-input" type="checkbox" id="chkAduan" checked>
-
+            <input class="form-check-input" type="checkbox" id="chkAduan">
             <label for="chkAduan" class="form-check-label">Pengaduan</label>
-
           </div>
 
           <div class="form-check mb-1">
-
-            <input class="form-check-input" type="checkbox" id="chkLegend" checked>
-
-            <label for="chkLegend" class="form-check-label">Panduan DMA</label>
-
-          </div>
-
-          <div class="form-check mb-1">
-
-            <input class="form-check-input" type="checkbox" id="chkWilayah" checked>
-
-            <label for="chkWilayah" class="form-check-label">DMA</label>
-
-          </div>
-
-          <div class="form-check mb-1">
-
-            <input class="form-check-input" type="checkbox" id="chkSensor" checked>
-
+            <input class="form-check-input" type="checkbox" id="chkSensor">
             <label for="chkSensor" class="form-check-label">Logger</label>
+          </div>
 
+
+          <div class="form-check mb-1">
+            <input class="form-check-input" type="checkbox" id="chkLabel">
+            <label for="chkLabel" class="form-check-label">Label</label>
           </div>
 
           <div class="form-check mb-1">
-
-            <input class="form-check-input" type="checkbox" id="chkPipa" checked>
-
-            <label for="chkPipa" class="form-check-label">Pipa</label>
-
+            <input class="form-check-input" type="checkbox" id="chkWilayah">
+            <label for="chkWilayah" class="form-check-label">DMA</label>
           </div>
 
-          <div class="mt-3" id="legendSection">
-
-            <label class="form-label">Panduan DMA</label>
-
-            <div id="legendBox" class="legend-list"></div>
-
-          </div>
+          
 
         </div>
 
@@ -510,7 +475,7 @@
 
 
 
-      <div class="footer">  © 2025 PDAM Wilayah6 . All rights reserved..</div>
+      <div class="footer">© 2025 Prumda Tirtawening wilayah 6.</div>
 
     </aside>
 
@@ -536,9 +501,9 @@
 
     // ======================= ENDPOINTS =======================
 
-    const GAS_ADUAN = "https://script.google.com/macros/s/AKfycbxgeKsU2cdAbu5yzo8UcNBzOoX22WrrCTRxV-KCowOjXX7aqf4mcO5celFtF4D197ZMIw/exec"; // mode=aduan
+    const GAS_ADUAN = "https://script\.google\.com/macros/s/AKfycbynOkn3NJuJvI8oE1Cuy83rW479Tod7e1Go72pRRH5F04XLkVpbytAXG3ARg-ZuqTLm0Q/exec"; // mode=aduan
 
-    const GAS_PELANGGAN = "https://script.google.com/macros/s/AKfycbxgeKsU2cdAbu5yzo8UcNBzOoX22WrrCTRxV-KCowOjXX7aqf4mcO5celFtF4D197ZMIw/exec"; // mode=pelanggan, histori
+    const GAS_PELANGGAN = "https://script\.google\.com/macros/s/AKfycbynOkn3NJuJvI8oE1Cuy83rW479Tod7e1Go72pRRH5F04XLkVpbytAXG3ARg-ZuqTLm0Q/exec"; // mode=pelanggan, histori
 
 
 
@@ -562,7 +527,7 @@
 
     // ======================= MAP BASICS =======================
 
-    const map = L.map('map',{ zoomAnimation:true, markerZoomAnimation:true, fadeAnimation:true, inertia:true }).setView([-6.9457,107.6093], 13);
+    const map = L.map('map',{ zoomAnimation:true, markerZoomAnimation:true, fadeAnimation:true, inertia:true }).setView([-6.9457,107.6093], 14);
 
     const baseLayers = {
 
@@ -729,6 +694,60 @@
 
     function badge(s){ return `<span class="badge badge-status ${s}">${s}</span>`; }
 
+    // Image helpers for Google Drive links
+    function buildDriveAlts(url){
+      const s = (url||'').trim();
+      if(!s) return { primary: '', alts: [], original: s };
+      let id = '';
+      const m1 = s.match(/[?&]id=([A-Za-z0-9_-]+)/);
+      const m2 = s.match(/\/d\/([A-Za-z0-9_-]+)/);
+      if(m1) id = m1[1]; else if(m2) id = m2[1];
+      if(!id && /^[A-Za-z0-9_-]+$/.test(s)) id = s;
+      if(id && id.endsWith('_')) id = id.slice(0,-1);
+      if(id){
+        const view = `https://drive.google.com/uc?export=view&id=${id}`;
+        const thumb = `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+        const dl = `https://drive.google.com/uc?export=download&id=${id}`;
+        const lh3 = `https://lh3.googleusercontent.com/d/${id}=w1000`;
+        return { primary: view, alts: [thumb, dl, lh3], original: s };
+      }
+      return { primary: s, alts: [], original: s };
+    }
+
+    function safeJson(v){ try{ return JSON.stringify(v||[]).replace(/[<]/g,'\\u003c'); }catch(_){ return '[]'; } }
+
+    function driveOnError(img){
+      try{
+        const alts = JSON.parse(img.getAttribute('data-alts')||'[]');
+        let i = Number(img.getAttribute('data-alt-idx')||'0');
+        if(i < alts.length){
+          img.setAttribute('data-alt-idx', String(i+1));
+          img.src = alts[i];
+        } else {
+          const url = img.getAttribute('data-original') || img.src || '#';
+          const a = document.createElement('a');
+          a.href = url; a.target = '_blank'; a.rel = 'noopener';
+          a.textContent = 'Buka foto';
+          a.className = 'btn btn-sm btn-outline-light';
+          img.replaceWith(a);
+        }
+      }catch(_){ /* ignore */ }
+    }
+
+    // Generic image resolver: supports Google Drive and mWater links
+    function buildImageAlts(url){
+      const s = (url||'').trim();
+      if(!s) return { primary:'', alts:[], original:s };
+      if(/drive\.google\.com|docs\.google\.com|\/d\//.test(s) || /[?&]id=/.test(s) || /^[A-Za-z0-9_-]+$/.test(s)){
+        return buildDriveAlts(s);
+      }
+      // mWater and other direct image URLs: just return as-is (no-referrer helps)
+      return { primary:s, alts:[], original:s };
+    }
+
+    // Alias for clarity
+    function imgOnError(img){ driveOnError(img); }
+
 
 
     // ======================= PELANGGAN =======================
@@ -753,7 +772,7 @@
 
             const p = feat.properties||{};
 
-            const idP = (p["ID"] ?? p["No Pelanggan"] ?? p["NomorPelanggan"] ?? "").toString().trim();
+            const idP = (p["ID"] ?? p["No Pelanggan"] ?? p["NomorPelanggan"] ?? "id").toString().trim();
 
             const statusRaw = (p["Status"] || p["Status Planggan"] || p["StatusBilling"] || "").toString().toLowerCase();
 
@@ -887,9 +906,9 @@
 
                 <div id="foto-${uid}" class="pp-sec" style="display:none; margin-top:8px;">
 
-                  ${ p["Foto Meter"] ? `<div class="mb-2"><div class="small text-secondary">Foto Meter</div><img src="${p["Foto Meter"]}" style="width:100%;border-radius:10px;"></div>` : '' }
+                  ${ (()=>{ const fm = buildDriveAlts(p["Foto Meter"]); return p["Foto Meter"] ? `<div class="mb-2"><div class="small text-secondary">Foto Meter</div><img src="${fm.primary}" data-original="${(p["Foto Meter"]||'').replace(/"/g,'&quot;')}" data-alts="${safeJson(fm.alts)}" referrerpolicy="no-referrer" loading="lazy" onerror="driveOnError(this)" style="width:100%;border-radius:10px;"></div>` : '' })() }
 
-                  ${ p["Foto Rumah"] ? `<div class="mb-2"><div class="small text-secondary">Foto Rumah</div><img src="${p["Foto Rumah"]}" style="width:100%;border-radius:10px;"></div>` : `<p class="text-secondary small">Tidak ada foto.</p>` }
+                  ${ (()=>{ const fr = buildDriveAlts(p["Foto Rumah"]); return p["Foto Rumah"] ? `<div class="mb-2"><div class="small text-secondary">Foto Rumah</div><img src="${fr.primary}" data-original="${(p["Foto Rumah"]||'').replace(/"/g,'&quot;')}" data-alts="${safeJson(fr.alts)}" referrerpolicy="no-referrer" loading="lazy" onerror="driveOnError(this)" style="width:100%;border-radius:10px;"></div>` : `<p class="text-secondary small">Tidak ada foto.</p>` })() }
 
                 </div>
 
@@ -928,6 +947,25 @@
               };
 
               btns.forEach(b=> b.addEventListener('click', ()=> setActive(b)));
+
+
+
+              // Normalize any images inside Foto section (Drive/mWater)
+              try{
+                const fotoSec = popupEl.querySelector('#' + 'foto-' + cssEscape(uid));
+                if(fotoSec){
+                  fotoSec.querySelectorAll('img').forEach(img=>{
+                    const orig = img.getAttribute('data-original') || img.getAttribute('src') || '';
+                    const conf = buildImageAlts(orig);
+                    img.setAttribute('data-original', orig);
+                    img.setAttribute('data-alts', safeJson(conf.alts));
+                    img.setAttribute('referrerpolicy','no-referrer');
+                    img.setAttribute('loading','lazy');
+                    img.onerror = function(){ imgOnError(this); };
+                    if(conf.primary) img.src = conf.primary;
+                  });
+                }
+              }catch(_){ /* ignore */ }
 
 
 
@@ -1048,6 +1086,8 @@
       const fs = document.getElementById('fstatus').value;
 
       return ADUAN.filter(r=>{
+        // Sembunyikan yang status sudah Proses (non-admin map view)
+        if (String(r.status||'').toLowerCase() === 'proses') return false;
 
         const hit = (r.nama||'').toLowerCase().includes(qv) || (r.alamat||'').toLowerCase().includes(qv) || (r.tiket||'').toLowerCase().includes(qv);
 
@@ -1077,13 +1117,7 @@
 
           <td>${r.tanggal||''}</td>
 
-          <td>${r.nama||''}<br><small class="text-secondary">${r.nopel||''}</small></td>
-
-          <td>${r.jenis||''}</td>
-
-          <td>${badge(r.status||'')}</td>
-
-          <td>${r.lokasi?`<a href="https://www.google.com/maps?q=${encodeURIComponent(r.lokasi)}" target="_blank"><i class="fas fa-location-dot"></i></a>`:''}</td>
+          <td>${r.nama||''}</td>
 
           <td><button class="btn btn-outline-info btn-sm" onclick="zoomToAduan('${r.tiket}')">Lihat</button></td>
 
@@ -1324,7 +1358,7 @@
 
         if(window.layerWilayah) map.removeLayer(window.layerWilayah);
 
-        window.layerWilayah = L.geoJSON(data, { style: featureStyle, onEachFeature:(f,layer)=>{ const p=f.properties||{}; const name = p.DMA || p.name || "Wilayah"; layer.bindPopup(`<div class='card-soft'><div class='fw-semibold'>${name}</div><div class='small'><div><b>Koordinator</b>: ${p.KORDINATOR||'-'}</div><div><b>DMA</b>: ${p.DMA||'-'}</div><div><b>Eksisting</b>: ${p.EKSISTING||'-'}</div><div><b>Potensi</b>: ${p.POTENSI||'-'}</div></div></div>`); layer.bindTooltip(String(name), { permanent:true, direction:'center', className:'dma-label' }); } }).addTo(map);
+        window.layerWilayah = L.geoJSON(data, { style: featureStyle, onEachFeature:(f,layer)=>{ const p=f.properties||{}; const name = p.DMA || p.name || "Wilayah"; layer.bindPopup(`<div class='card-soft'><div class='fw-semibold'>${name}</div><div class='small'><div><b>Koordinator</b>: ${p.KORDINATOR||'-'}</div><div><b>DMA</b>: ${p.DMA||'-'}</div><div><b>Eksisting</b>: ${p.EKSISTING||'-'}</div><div><b>Potensi</b>: ${p.POTENSI||'-'}</div></div></div>`); } }).addTo(map);
 
         applyLayerVisibility();
 
@@ -1351,10 +1385,39 @@
     }
 
 
+    // ======================= DMA LABELS (separate) =======================
+
+    async function loadLabel(){
+      try{
+        if(!window.layerWilayah){ await loadWilayah(); }
+        if(window.layerLabel){ map.removeLayer(window.layerLabel); }
+        window.layerLabel = L.layerGroup().addTo(map);
+        if(window.layerWilayah){
+          window.layerWilayah.eachLayer(function(l){
+            try{
+              var p = (l.feature && l.feature.properties) || {};
+              var name = p.DMA || p.name || '';
+              if(!name) return;
+              var center = l.getBounds().getCenter();
+              var icon = L.divIcon({ className:'', html: '<div class="dma-label">'+String(name)+'</div>' });
+              L.marker(center, { icon: icon, interactive:false }).addTo(window.layerLabel);
+            }catch(_){ }
+          });
+        }
+        applyLayerVisibility();
+      }catch(e){ console.error('Gagal memuat label DMA', e); }
+    }
+
+    function removeLabel(){ try{ if(window.layerLabel){ map.removeLayer(window.layerLabel); window.layerLabel = null; } }catch(_){}
+    }
+
+    // (Label DMA feature removed as requested)
+
+
 
     // ======================= LAYER VISIBILITY =======================
 
-    const layersMap = { Pelanggan: ()=>window.layerPelanggan, Aduan: ()=>window.layerAduan, Wilayah: ()=>window.layerWilayah, Sensor: ()=>window.tekananLayer, Pipa: ()=>window.layerPipa };
+    const layersMap = { Pelanggan: ()=>window.layerPelanggan, Aduan: ()=>window.layerAduan, Sensor: ()=>window.tekananLayer, Label: ()=>window.layerLabel, Wilayah: ()=>window.layerWilayah };
 
     function applyLayerVisibility(){
 
@@ -1370,21 +1433,17 @@
 
       });
 
-      const chkLegend = document.getElementById('chkLegend');
-
-      if(chkLegend){
-
-        const sec = document.getElementById('legendSection');
-
-        if(sec) sec.style.display = chkLegend.checked ? '' : 'none';
-
-        // keep Leaflet legend hidden if it was added previously
-
-        if(window._legendAdded && window.dmaLegend){ try{ map.removeControl(window.dmaLegend); }catch{} window._legendAdded=false; }
-
-      }
+      // Legend removed; ensure any Leaflet legend control is not present
+      if(window._legendAdded && window.dmaLegend){ try{ map.removeControl(window.dmaLegend); }catch(_){} window._legendAdded=false; }
 
     }
+
+    // Helpers to remove layers when toggled off
+    function removePelanggan(){ try{ if(window.layerPelanggan){ clusterGroup.removeLayer(window.layerPelanggan); window.layerPelanggan = null; } }catch(_){} }
+    function removeAduan(){ try{ if(window.layerAduan){ map.removeLayer(window.layerAduan); window.layerAduan = null; } }catch(_){} }
+    function removeWilayah(){ try{ if(window.layerWilayah){ map.removeLayer(window.layerWilayah); window.layerWilayah = null; } }catch(_){} }
+    function removeSensor(){ try{ if(window.tekananLayer){ map.removeLayer(window.tekananLayer); window.tekananLayer = null; } }catch(_){} try{ const tbody=document.querySelector('#tblTekanan tbody'); if(tbody) tbody.innerHTML='<tr><td colspan="3" class="text-secondary">Logger disembunyikan</td></tr>'; }catch(_){} }
+    function removePipa(){ try{ if(window.layerPipa){ map.removeLayer(window.layerPipa); window.layerPipa = null; } }catch(_){} }
 
 
 
@@ -1412,19 +1471,49 @@
 
     })();// ======================= INIT =======================
 
-    loadPelanggan(); setInterval(loadPelanggan, 60000);
+    // Start hidden: ensure all toggles are off initially
+    ['Pelanggan','Aduan','Sensor','Label','Wilayah'].forEach(function(name){
+      var el = document.getElementById('chk'+name);
+      if(el) el.checked = false;
+    });
+    applyLayerVisibility();
 
-    // Set default filter ke "Baru" di load awal saja
+    // Wire toggles: load on check, remove on uncheck
+   function onToggle(id, loadFn, removeFn) {
+  const el = document.getElementById(id);
+  if (!el) return;
 
-    const fsEl = document.getElementById('fstatus'); if (fsEl) fsEl.value = 'Baru';
+  el.addEventListener('change', function() {
+    if (el.checked) {
+      // 🟥 Sekarang saat DICENTANG → removeFn()
+      try {
+        if (typeof removeFn === "function") removeFn();
+      } catch (err) {
+        console.warn(`removeFn error di ${id}:`, err);
+      }
+      if (typeof applyLayerVisibility === "function") applyLayerVisibility();
+    } else {
+      // 🟩 Saat DIHAPUS centangnya → loadFn()
+      if (typeof loadFn === "function") loadFn();
+    }
+  });
+}
 
-    loadAduan(); setInterval(loadAduan, 30000);
 
-    loadTekanan(); setInterval(loadTekanan, 15000);
+    onToggle('chkPelanggan', loadPelanggan, removePelanggan);
+    onToggle('chkAduan', loadAduan, removeAduan);
+    onToggle('chkSensor', loadTekanan, removeSensor);
+    onToggle('chkLabel', loadLabel, removeLabel);
+    onToggle('chkWilayah', loadWilayah, removeWilayah);
 
-    loadWilayah(); setInterval(loadWilayah, 120000);
-
-    loadPipa(); setInterval(loadPipa, 180000);
+    // Periodic refresh only when the layer is visible
+    function schedule(id, fn, ms){ setInterval(function(){ var el=document.getElementById(id); if(el && el.checked){ fn(); } }, ms); }
+    schedule('chkPelanggan', loadPelanggan, 60000);
+    // Set default filter ke "Baru" untuk daftar aduan (saat diaktifkan)
+    var fsEl = document.getElementById('fstatus'); if (fsEl) fsEl.value = 'Baru';
+    schedule('chkAduan', loadAduan, 30000);
+    schedule('chkSensor', loadTekanan, 15000);
+    schedule('chkWilayah', loadWilayah, 120000);
 
   </script>
 

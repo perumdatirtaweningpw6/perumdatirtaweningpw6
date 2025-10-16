@@ -314,7 +314,7 @@
 
 
 
-  <footer class="mt-4 text-center text-secondary">© 2025 PDAM Wilayah6 . All rights reserved.</footer>
+  <footer class="mt-4 text-center text-secondary">© 2025 Prumda Tirtawening wilayah 6.</footer>
 
 
 
@@ -347,7 +347,7 @@
 
     // === SET YOUR APPS SCRIPT DEPLOYMENT URL HERE ===
 
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwMLCYvMZIM9uMuZlzqsnhroINTh8gcLr9fQcbQLTTP4LcqzBSO50hFJCfAFncBNnW5Bw/exec"; // TODO: ganti dengan URL web app
+    const GAS_URL = "https://script\.google\.com/macros/s/AKfycbynOkn3NJuJvI8oE1Cuy83rW479Tod7e1Go72pRRH5F04XLkVpbytAXG3ARg-ZuqTLm0Q/exec"; // TODO: ganti dengan URL web app
 
 
 
@@ -497,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === Apps Script URL ===
 
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbz5BaQOUHGv_B9wHAraZB3vtbxBwnKgATsXvfb0WpwQ9NYausrgsfusi4LHlvxLFzfs3Q/exec";
+  const GAS_URL = "https://script\.google\.com/macros/s/AKfycbynOkn3NJuJvI8oE1Cuy83rW479Tod7e1Go72pRRH5F04XLkVpbytAXG3ARg-ZuqTLm0Q/exec";
 
 
 
@@ -789,6 +789,60 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 });
+
+(function(){
+  // util setter field
+  function setVal(id, v){ var el=document.getElementById(id); if(el) el.value = (v==null?'':String(v)); }
+  function setText(id, v){ var el=document.getElementById(id); if(el) el.textContent = (v==null||v===''?'-':String(v)); }
+
+  function applyAutofill(d){
+    // isi input yang sudah ada di modal
+    setVal('inNopel',  d.id || '');
+    setVal('inNama',   d.nama || '');
+    setVal('inAlamat', d.alamat || '');
+
+    // lat/lng + panel stat (format 6 desimal biar rapi)
+    var lat = (d.lat!=null) ? Number(d.lat).toFixed(6) : '';
+    var lng = (d.lng!=null) ? Number(d.lng).toFixed(6) : '';
+    setVal('inLat', lat);
+    setVal('inLng', lng);
+    setText('inLatStat', lat || '-');
+    setText('inLngStat', lng || '-');
+    setText('inAccStat', '-'); // akurasi kosong (asalnya dari GPS tombol Current Location)
+
+    // buka modal Input Pengaduan
+    try{
+      var modalEl = document.getElementById('inputModal');
+      if (modalEl){
+        var m = bootstrap.Modal.getOrCreateInstance(modalEl);
+        m.show();
+        setTimeout(()=>{ try{ document.getElementById('inJenis')?.focus(); }catch(_){} }, 400);
+      }
+    }catch(e){ console.error(e); }
+  }
+
+  // Saat halaman load, cek localStorage key dari peta
+  document.addEventListener('DOMContentLoaded', function(){
+    try{
+      const raw = localStorage.getItem('pengaduan_autofill');
+      if(!raw) return;
+      localStorage.removeItem('pengaduan_autofill'); // one-shot
+      const d = JSON.parse(raw||'{}');
+      if (d && (d.id || d.nama || d.alamat || (d.lat!=null && d.lng!=null))){
+        applyAutofill(d);
+      }
+    }catch(e){ console.error(e); }
+  });
+
+  // (Opsional) dukung postMessage jika nanti mau kirim antar-window tanpa reload
+  window.addEventListener('message', function(ev){
+    try{
+      if(!ev?.data || ev.data.type !== 'pengaduan_autofill') return;
+      applyAutofill(ev.data.payload || {});
+    }catch(e){ console.error(e); }
+  });
+})();
+</script>
 
 </script>
 

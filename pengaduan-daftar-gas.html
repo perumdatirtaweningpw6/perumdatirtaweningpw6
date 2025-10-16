@@ -40,12 +40,44 @@
 
     .badge-status.Selesai { background:#28a745; }
 
-    .form-control, .form-select { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.12); }
+    /* Input readability on dark theme */
+    .form-control, .form-select {
+      background: rgba(255,255,255,0.16);
+      color: #e6f3ff;
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 .1rem rgba(77,184,255,.3);
+      background: rgba(255,255,255,0.2);
+      color: #e6f3ff;
+    }
+    .form-control::placeholder, textarea.form-control::placeholder {
+      color: #cfeaff;
+      opacity: .9;
+    }
+    /* File input button contrast */
+    .form-control::file-selector-button {
+      background: rgba(230,243,255,.9);
+      color: #07263f;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    /* Ensure dropdown option text is readable (dark theme fix) */
+    .form-select option, select option { color: #0b1f3b; background-color: #ffffff; }
+    .form-select option:checked, .form-select option:hover { background-color: #e6f3ff; color: #0b1f3b; }
 
     .btn-brand { background: var(--brand); color: #07263f; border: none; }
 
     a { color: var(--ink); }
 
+    /* Small helper for modal detail */
+    .col-fit{ width:1%; white-space:nowrap; }
+    .photo-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr)); gap:8px; }
+    .photo-grid img{ width:100%; height:90px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,.25); }
+    /* Compact location picker */
+    .loc-compact .btn{ width: 100%; text-align:left; }
+    .loc-compact .hint{ font-size:.9rem; color:#cfeaff; }
+    .loc-compact .stat{ font-size:.9rem; color:#cfeaff; }
   </style>
 
   <link rel="stylesheet" href="css/responsive.css" />
@@ -65,7 +97,7 @@
 
     <div class="ms-auto d-flex gap-2">
 
-      <a class="btn btn-sm btn-outline-info" href="pengaduan-input-gas.html">Input Aduan</a>
+      <a class="btn btn-sm btn-outline-info" href="index.html">Halaman Utama</a>
 
     </div>
 
@@ -77,9 +109,9 @@
 
     <div class="text-center mb-3" data-aos="fade-down">
 
-      <h3 class="fw-bold text-info"><i class="fas fa-queue me-2"></i>Daftar Antrian Tiket (GAS)</h3>
-
-      <p class="subtitle">Data diambil dari Sheet "Pengaduan".</p>
+      <h3 class="fw-bold text-info"><i class="fas fa-queue me-2"></i>Daftar Antrian Tiket Pengaduan</h3>
+      <p>Buat Input Pengaduan Baru di Button Pengaduan</p>
+      
 
     </div>
 
@@ -99,19 +131,9 @@
 
         <div class="col-md-3">
 
-          <label class="form-label">Status</label>
+          <label class="form-label">Tanggal</label>
 
-          <select id="fstatus" class="form-select">
-
-            <option value="">Semua</option>
-
-            <option>Baru</option>
-
-            <option>Proses</option>
-
-            <option>Selesai</option>
-
-          </select>
+          <input id="fdate" type="date" class="form-control" />
 
         </div>
 
@@ -131,18 +153,24 @@
 
     <div class="card p-3" data-aos="fade-up" data-aos-delay="50">
 
-      <div class="table-responsive">
+      <div class="d-flex justify-content-end gap-2 mb-2">
+        <button id="btnOpenInput" class="btn btn-brand btn-sm" type="button"><i class="fas fa-file-circle-plus me-1"></i>Input Pengaduan</button>
+        <button id="btnRefreshList" class="btn btn-outline-light btn-sm" type="button"><i class="fas fa-rotate"></i> Refresh</button>
+      </div>
 
-        <table class="table table-dark table-hover align-middle">
+      <div class="table-responsive" id="aduanTableWrap">
+
+        <table class="table table-dark table-hover align-middle aduan-table">
 
           <thead>
-
             <tr>
-
-              <th>#</th><th>Tiket</th><th>Tanggal</th><th>Nama</th><th>Jenis</th><th>Status</th><th>Lokasi</th><th>Aksi</th>
-
+              <th>#</th>
+              <th>Tiket</th>
+              <th>Tanggal (WIB)</th>
+              <th>Jenis</th>
+              <th>Nama</th>
+              <th>Alamat</th>
             </tr>
-
           </thead>
 
           <tbody id="tb"></tbody>
@@ -157,9 +185,9 @@
 
         <div class="d-flex gap-2">
 
-          <button class="btn btn-outline-light btn-sm" onclick="prev()">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹</button>
+          <button class="btn btn-outline-light btn-sm" onclick="prev()">&lsaquo;</button>
 
-          <button class="btn btn-outline-light btn-sm" onclick="next()">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âº</button>
+          <button class="btn btn-outline-light btn-sm" onclick="next()">&rsaquo;</button>
 
         </div>
 
@@ -169,9 +197,147 @@
 
   </div>
 
+  <!-- Detail Modal -->
+  <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="background: rgba(16,40,78,.95); color:#fff;">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-id-card-clip me-2"></i>Detail Pengaduan</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body">
+          <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabPelanggan" type="button" role="tab">Detail Pelanggan</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabKet" type="button" role="tab">Keterangan</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabFoto" type="button" role="tab">Foto</button></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="tabPelanggan" role="tabpanel"><div id="pelangganTab"></div></div>
+            <div class="tab-pane fade" id="tabKet" role="tabpanel"><div id="ketTab"></div></div>
+            <div class="tab-pane fade" id="tabFoto" role="tabpanel"><div id="fotoTab"></div></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-light" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Pengaduan Modal -->
+  <div class="modal fade" id="inputModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="background: rgba(16,40,78,.95); color:#fff;">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-file-circle-plus me-2"></i>Input Pengaduan</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body">
+          <div id="inputAlert"></div>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Status Pelanggan</label>
+              <div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="inLangganan">
+                  <label class="form-check-label" for="inLangganan">Langganan</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="inNonLangganan">
+                  <label class="form-check-label" for="inNonLangganan">Nonlangganan</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">No Langganan</label>
+              <input id="inNopel" class="form-control" placeholder="No Pelanggan"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nama</label>
+              <input id="inNama" class="form-control" placeholder="Nama pelanggan"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Kontak</label>
+              <input id="inKontak" class="form-control" placeholder="08xxxx"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Jenis Keluhan</label>
+              <select id="inJenis" class="form-select">
+                <option>Air Kecil</option>
+                <option>Air Mati</option>
+                <option>Kebocoran</option>
+                <option>Meter Rusak</option>
+                <option>Lainnya</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Alamat</label>
+              <input id="inAlamat" class="form-control" placeholder="Alamat lengkap"/>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Keterangan</label>
+              <textarea id="inKet" class="form-control" rows="3" placeholder="Jelaskan keluhan..."></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Set Lokasi</label>
+              <div class="row g-2 loc-compact">
+                <div class="col-sm-6 col-12 d-grid gap-2">
+                  <button id="inBtnGeo" type="button" class="btn btn-outline-info"><i class="fas fa-location-arrow me-2"></i>Current Location</button>
+                  <button id="inBtnUseMap" type="button" class="btn btn-outline-light"><i class="fas fa-location-dot me-2"></i>Use Map</button>
+                  <button id="inBtnClear" type="button" class="btn btn-outline-secondary"><i class="fas fa-circle-xmark me-2"></i>Clear</button>
+                </div>
+                <div class="col-sm-6 col-12">
+                  <div class="stat">Latitude: <span id="inLatStat">-</span></div>
+                  <div class="stat">Longitude: <span id="inLngStat">-</span></div>
+                  <div class="stat">Accuracy: <span id="inAccStat">-</span></div>
+                  <div class="hint mt-2" id="inLocHint"></div>
+                </div>
+              </div>
+              <input type="hidden" id="inLat"/>
+              <input type="hidden" id="inLng"/>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Foto (opsional)</label>
+              <input id="inFoto" type="file" accept="image/*" class="form-control"/>
+              <small class="text-secondary">Format gambar, ukuran wajar untuk mempercepat upload.</small>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Video (opsional)</label>
+              <input id="inVideo" type="file" accept="video/*" class="form-control"/>
+              <small class="text-secondary">File video dapat memperlambat upload jika besar.</small>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-light" data-bs-dismiss="modal">Tutup</button>
+          <button id="btnSubmitInput" class="btn btn-brand" type="button">Kirim</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map picker for Input Modal -->
+  <div class="modal fade modal-fullscreen-sm-down" id="mapPickModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="background: rgba(16,40,78,.96); color:#e6f3ff;">
+        <div class="modal-header border-0">
+          <h5 class="modal-title"><i class="fas fa-location-dot me-2"></i>Pilih Lokasi</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body pt-0">
+          <div id="mapPick" style="height:70vh; border-radius:12px;"></div>
+          <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-success" id="btnMapUseGPS" type="button"><i class="fas fa-location-arrow me-2"></i>Pakai Lokasi Saya</button>
+            <button class="btn btn-primary ms-auto" id="btnMapSave" type="button"><i class="fas fa-check me-2"></i>Simpan Lokasi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
-  <footer class="mt-4 text-center text-secondary">© 2025 PDAM Wilayah6 . All rights reserved.</footer>
+
+  <footer class="mt-4 text-center text-secondary">© 2025 Prumda Tirtawening wilayah 6.</footer>
 
 
 
@@ -181,11 +347,15 @@
 
   <script>AOS.init({duration:800, once:true});</script>
 
+  <!-- Leaflet for map picker -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <script>
 
     // === SET YOUR APPS SCRIPT DEPLOYMENT URL HERE ===
 
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwMLCYvMZIM9uMuZlzqsnhroINTh8gcLr9fQcbQLTTP4LcqzBSO50hFJCfAFncBNnW5Bw/exec"; // TODO: ganti URL web app
+    const GAS_URL = "https://script\.google\.com/macros/s/AKfycbynOkn3NJuJvI8oE1Cuy83rW479Tod7e1Go72pRRH5F04XLkVpbytAXG3ARg-ZuqTLm0Q/exec"; // TODO: ganti URL web app
 
 
 
@@ -207,29 +377,38 @@
 
       // [Tiket, Tanggal, Jenis Keluhan, Nomor Pelanggan, Nama Pelanggan, Alamat, Kontak, Keterangan, Lokasi, Dokumentasi Pengaduan, Status]
 
+      // Flexible key picker to handle different sheet headers
+      const pickAny = (obj, keys)=>{
+        if(!obj) return '';
+        for(const k of keys){ if(obj[k] != null && String(obj[k]).trim() !== '') return obj[k]; }
+        const all = Object.keys(obj);
+        for(const k of keys){ const m = all.find(x => x.toLowerCase() === String(k).toLowerCase()); if(m && obj[m] != null && String(obj[m]).trim() !== '') return obj[m]; }
+        return '';
+      };
+
       return list.map(o => ({
 
-        tiket: o["Tiket"],
+        tiket  : pickAny(o, ["Tiket","No Tiket","tiket"]),
 
-        tanggal: o["Tanggal"],
+        tanggal: pickAny(o, ["Tanggal","Waktu","Created At","tanggal"]),
 
-        jenis: o["Jenis Keluhan"],
+        jenis  : pickAny(o, ["Jenis Keluhan","Jenis","jenis"]),
 
-        nopel: o["Nomor Pelanggan"],
+        nopel  : pickAny(o, ["Nomor Pelanggan","NomorPelanggan","No Pelanggan","NoLang","No Langganan","nolangganan","nolang"]),
 
-        nama: o["Nama Pelanggan"],
+        nama   : pickAny(o, ["Nama Pelanggan","Nama","name","nama"]),
 
-        alamat: o["Alamat"],
+        alamat : pickAny(o, ["Alamat","Address","alamat"]),
 
-        kontak: o["Kontak"],
+        kontak : pickAny(o, ["Kontak","Nomor Kontak","NomorKontak","HP","No HP","Telepon","No Telp","No Telepon","phone","telp"]),
 
-        ket: o["Keterangan"],
+        ket    : pickAny(o, ["Keterangan","Catatan","Deskripsi","keterangan"]),
 
-        lokasi: o["Lokasi"],
+        lokasi : pickAny(o, ["Lokasi","Koordinat","latlng","lokasi"]),
 
-        foto: o["Dokumentasi Pengaduan"],
+        foto   : pickAny(o, ["Dokumentasi Pengaduan","Dokumentasi","Foto","Gambar","dokumentasi"]),
 
-        status: o["Status"]
+        status : pickAny(o, ["Status","status"]) || 'Baru'
 
       }));
 
@@ -239,7 +418,7 @@
 
     function badge(s){ return '<span class="badge badge-status '+s+'">'+s+'</span>'; }
 
-    function resetFilter(){ q.value=''; fstatus.value=''; render(); }
+    function resetFilter(){ q.value=''; var fd=document.getElementById('fdate'); if(fd) fd.value=''; render(); }
 
     function prev(){ if(page.idx>0){ page.idx--; render(); } }
 
@@ -251,19 +430,26 @@
 
     }
 
+    // Helpers for date filter (WIB)
+    function _parseDate(v){ try{ if(!v) return 0; var s=String(v).trim(); var d=new Date(s); if(!isNaN(d)) return d.getTime(); var m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return new Date(m[1]+'-'+m[2]+'-'+m[3]).getTime(); var m2=s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})/); if(m2) return new Date(m2[3]+'-'+m2[2]+'-'+m2[1]).getTime(); return 0; }catch(_){ return 0; } }
+    function _toDateKeyWIB(v){ try{ var ms=0; if(typeof v==='number') ms=v; else { ms=_parseDate(v); if(!ms&&v){ var d=new Date(String(v)); if(!isNaN(d)) ms=d.getTime(); } } if(!ms) return ''; var d=new Date(ms); var parts = new Intl.DateTimeFormat('id-ID',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:'Asia/Jakarta'}).formatToParts(d).reduce(function(a,p){a[p.type]=p.value;return a;},{}); var pad=function(s){return String(s).padStart(2,'0');}; return parts.year+'-'+pad(parts.month)+'-'+pad(parts.day); }catch(_){ return ''; } }
+
     function filtered(){
 
       const qv = (q.value||'').toLowerCase();
 
-      const fs = fstatus.value;
+      const fdEl = document.getElementById('fdate');
+      const fdate = (fdEl && fdEl.value) ? String(fdEl.value) : '';
 
       return DATA.filter(r=>{
+        // Sembunyikan yang status sudah Proses (public daftar)
+        if (String(r.status||'').toLowerCase() === 'proses') return false;
 
-        const hit = (r.nama||'').toLowerCase().includes(qv) || (r.alamat||'').toLowerCase().includes(qv) || (r.tiket||'').toLowerCase().includes(qv);
+        const hit = (r.nama||'').toLowerCase().includes(qv) || (r.alamat||'').toLowerCase().includes(qv) || (r.tiket||'').toLowerCase().includes(qv) || (r.jenis||'').toLowerCase().includes(qv);
 
-        const sOK = !fs || r.status===fs;
+        const dOK = !fdate || _toDateKeyWIB(r.tanggal) === fdate;
 
-        return hit && sOK;
+        return hit && dOK;
 
       });
 
@@ -297,7 +483,11 @@
 
         console.error(err);
 
-        alert('Error jaringan/CORS. Pastikan Apps Script Web App akses Anyone.');
+        // Hindari alert blocking; tampilkan pesan ringan di bawah tabel
+        try{
+          var info = document.getElementById('countInfo');
+          if(info){ info.classList.add('text-danger'); info.textContent = 'Gagal memuat data. Periksa koneksi/GAS, lalu klik Refresh.'; }
+        }catch(_){ /* ignore */ }
 
       }
 
@@ -329,7 +519,7 @@
 
           <td>${badge(r.status||'')}</td>
 
-          <td>${r.lokasi?`<a href="https://www.google.com/maps?q=${encodeURIComponent(r.lokasi)}" target="_blank">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â</a>`:''}</td>
+          <td>${r.lokasi?`<a href="https://www.google.com/maps?q=${encodeURIComponent(r.lokasi)}" target="_blank">ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â</a>`:''}</td>
 
           <td>
 
@@ -346,8 +536,34 @@
         </tr>
 
       `).join('');
+      // Override with custom columns; tiket displayed as plain text (no click)
+      try{
+        (function(){
+          var rowsX = filtered();
+          var startX = page.idx * page.size;
+          var itemsX = rowsX.slice(startX, startX + page.size);
+          var EH = function(s){ s = (s==null?'':String(s)); return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;'); };
+          var html = '';
+          var parseDate = function(v){ try{ if(!v) return 0; var s=String(v).trim(); var d=new Date(s); if(!isNaN(d)) return d.getTime(); var m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return new Date(m[1]+'-'+m[2]+'-'+m[3]).getTime(); var m2=s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})/); if(m2) return new Date(m2[3]+'-'+m2[2]+'-'+m2[1]).getTime(); return 0; }catch(_){ return 0; } };
+          var fmtWIB = function(v){ try{ var ms=0; if(typeof v==='number') ms=v; else { ms=parseDate(v); if(!ms&&v){ var d=new Date(String(v)); if(!isNaN(d)) ms=d.getTime(); } } if(!ms) return (v||''); var d=new Date(ms); var parts = new Intl.DateTimeFormat('id-ID',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Jakarta'}).formatToParts(d).reduce(function(a,p){a[p.type]=p.value;return a;},{}); var pad=function(s){return String(s).padStart(2,'0');}; return parts.year+'-'+pad(parts.month)+'-'+pad(parts.day)+' '+pad(parts.hour)+':'+pad(parts.minute)+' WIB'; }catch(_){ return (v||''); } };
+          for (var ii=0; ii<itemsX.length; ii++){ var r = itemsX[ii]||{}; html += '<tr>'
+            + '<td>'+ (startX+ii+1) +'</td>'
+            + '<td><strong>'+
+              EH((function(s){ try{ var str=String(s||''); var m=str.match(/^(.*?)(\d+)(\D*)$/); if(!m) return str; var pref=m[1]||''; var num=m[2]||''; var suf=m[3]||''; return pref + String(num).padStart(6,'0') + suf; }catch(_){ return s||''; } })(r.tiket||''))
+              +'</strong></td>'
+            + '<td>'+ EH(fmtWIB(r.tanggal||'')) +'</td>'
+            + '<td>'+ EH(r.jenis||'') +'</td>'
+            + '<td>'+ EH(r.nama||'') +'</td>'
+            + '<td>'+ EH(r.alamat||'') +'</td>'
+          + '</tr>'; }
+          tb.innerHTML = html;
+        })();
+      }catch(_){}
 
+      countInfo.classList.remove('text-danger');
+      countInfo.classList.add('text-secondary');
       countInfo.textContent = `Menampilkan ${rows.length?start+1:0}-${Math.min(start+page.size, rows.length)} dari ${rows.length} tiket`;
+      try{ rewriteRows(); }catch(e){ }
 
     }
 
@@ -359,6 +575,15 @@
 
         DATA = await fetchList();
 
+        // Urutkan berdasarkan angka pada kolom Tiket (menaik)
+        const _ticketNum = (t)=>{
+          try{
+            const m = String(t||'').match(/\d+/g);
+            return m ? parseInt(m[m.length-1], 10) : Number.MAX_SAFE_INTEGER;
+          }catch{ return Number.MAX_SAFE_INTEGER; }
+        };
+        DATA.sort((a,b)=> _ticketNum(a.tiket) - _ticketNum(b.tiket));
+
         page.idx = 0;
 
         render();
@@ -367,7 +592,15 @@
 
         console.error(err);
 
-        alert('Gagal memuat data. Cek URL GAS & izin Web App.');
+        // Jangan tampilkan alert; update info area secara halus
+        try{
+          var info = document.getElementById('countInfo');
+          if(info){
+            info.classList.remove('text-secondary');
+            info.classList.add('text-danger');
+            info.textContent = 'Gagal memuat data. Coba klik Refresh.';
+          }
+        }catch(_){ /* ignore */ }
 
       }
 
@@ -376,6 +609,177 @@
 
 
     loadAndRender();
+
+    // Smooth Refresh button behavior
+    (function(){
+      var btn = document.getElementById('btnRefreshList');
+      var wrap = document.getElementById('aduanTableWrap');
+      if(!btn) return;
+      btn.addEventListener('click', async function(){
+        try{
+          btn.disabled = true; var old = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refresh';
+          if(wrap){ wrap.style.transition='opacity .25s'; wrap.style.opacity='0.5'; }
+          await loadAndRender();
+        }catch(e){ console.error(e); }
+        finally{
+          if(wrap){ wrap.style.opacity='1'; }
+          btn.disabled = false; btn.innerHTML = '<i class="fas fa-rotate"></i> Refresh';
+        }
+      });
+    })();
+
+    // Input Pengaduan modal behavior
+    (function(){
+      var openBtn = document.getElementById('btnOpenInput');
+      var modalEl = document.getElementById('inputModal');
+      var submitBtn = document.getElementById('btnSubmitInput');
+      if(!openBtn || !modalEl || !submitBtn) return;
+      var modal = new bootstrap.Modal(modalEl);
+      openBtn.addEventListener('click', function(){
+        try{ document.getElementById('inputAlert').innerHTML=''; }catch{}
+        modal.show();
+      });
+      // location helpers
+      var latEl = document.getElementById('inLat');
+      var lngEl = document.getElementById('inLng');
+      var statLat = document.getElementById('inLatStat');
+      var statLng = document.getElementById('inLngStat');
+      var statAcc = document.getElementById('inAccStat');
+      function setLoc(lat,lng,acc){
+        if(latEl) latEl.value = (lat!=null?Number(lat).toFixed(6):'');
+        if(lngEl) lngEl.value = (lng!=null?Number(lng).toFixed(6):'');
+        if(statLat) statLat.textContent = latEl.value||'-';
+        if(statLng) statLng.textContent = lngEl.value||'-';
+        if(statAcc) statAcc.textContent = (acc!=null?('± '+Math.round(acc)+' m'):'-');
+      }
+      document.getElementById('inBtnClear').addEventListener('click', function(){ setLoc(null,null,null); });
+      document.getElementById('inBtnGeo').addEventListener('click', function(){
+        if(!navigator.geolocation){ alert('Geolocation tidak didukung browser.'); return; }
+        navigator.geolocation.getCurrentPosition(function(pos){ setLoc(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy); }, function(err){ console.error(err); alert('Gagal ambil lokasi. Aktifkan izin lokasi.'); }, {enableHighAccuracy:true, timeout:8000, maximumAge:0});
+      });
+      // Map picker
+      var mapModalEl = document.getElementById('mapPickModal');
+      var btnUseMap = document.getElementById('inBtnUseMap');
+      var btnMapUseGPS = document.getElementById('btnMapUseGPS');
+      var btnMapSave = document.getElementById('btnMapSave');
+      var map=null, marker=null; var mapModal;
+      function initMap(){ if(map||typeof L==='undefined') return; map = L.map('mapPick',{zoomControl:true, preferCanvas:true}).setView([-6.9147,107.6098],12); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map); map.on('click', function(e){ var pos=e.latlng; if(!marker) marker=L.marker([pos.lat,pos.lng]).addTo(map); else marker.setLatLng(pos); }); setTimeout(function(){ try{ map.invalidateSize(); }catch(_){} },0); }
+      btnUseMap.addEventListener('click', function(){ mapModal = new bootstrap.Modal(mapModalEl); mapModal.show(); setTimeout(function(){ initMap(); },100); });
+      btnMapUseGPS.addEventListener('click', function(){ if(!navigator.geolocation) return alert('Geolocation tidak didukung.'); navigator.geolocation.getCurrentPosition(function(pos){ initMap(); var la=pos.coords.latitude, lo=pos.coords.longitude; if(!marker) marker=L.marker([la,lo]).addTo(map); else marker.setLatLng([la,lo]); map.setView([la,lo], Math.max(map.getZoom(),16)); }, function(err){ alert('Gagal ambil lokasi.'); }, {enableHighAccuracy:true, timeout:8000, maximumAge:0}); });
+      btnMapSave.addEventListener('click', function(){ if(!marker){ alert('Klik peta untuk pilih lokasi.'); return; } var p=marker.getLatLng(); setLoc(p.lat, p.lng, null); try{ mapModal.hide(); }catch(_){} });
+      function toDataURL(file){ return new Promise(function(resolve,reject){ if(!file) return resolve(""); var r=new FileReader(); r.onload=function(){ resolve(r.result); }; r.onerror=reject; r.readAsDataURL(file); }); }
+      function setMsg(type, msg){ var box=document.getElementById('inputAlert'); if(box){ box.innerHTML='<div class="alert alert-'+type+'">'+msg+'</div>'; } }
+      // helper to clear all input fields in modal
+      function _clearInputForm(){
+        try{
+          ['inNama','inNopel','inAlamat','inKontak','inKet','inLat','inLng'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+          var jenisEl = document.getElementById('inJenis'); if(jenisEl) jenisEl.selectedIndex = 0;
+          var fotoEl  = document.getElementById('inFoto'); if(fotoEl) fotoEl.value='';
+          var videoEl = document.getElementById('inVideo'); if(videoEl) videoEl.value='';
+          setLoc(null,null,null);
+          var nm = document.getElementById('inNama'); if(nm) nm.focus();
+          try{ var cb1=document.getElementById('inLangganan'); var cb2=document.getElementById('inNonLangganan'); if(cb1) cb1.checked=false; if(cb2) cb2.checked=false; }catch(_){ }
+        }catch(e){ console.warn('clear form fail', e); }
+      }
+
+      // Make the two checkboxes act like radio (mutually exclusive)
+      (function(){ var a=document.getElementById('inLangganan'); var b=document.getElementById('inNonLangganan'); if(a&&b){ a.addEventListener('change', function(){ if(a.checked) b.checked=false; }); b.addEventListener('change', function(){ if(b.checked) a.checked=false; }); } })();
+
+      submitBtn.addEventListener('click', async function(){
+        try{
+          submitBtn.disabled=true; var old=submitBtn.innerHTML; submitBtn.innerHTML='<i class="fas fa-spinner fa-spin me-1"></i>Kirim...';
+          var nama = (document.getElementById('inNama').value||'').trim();
+          var nopel= (document.getElementById('inNopel').value||'').trim();
+          var alamat=(document.getElementById('inAlamat').value||'').trim();
+          var kontak=(document.getElementById('inKontak').value||'').trim();
+          var jenis = document.getElementById('inJenis').value;
+          var ket   =(document.getElementById('inKet').value||'').trim();
+          var lat   =(document.getElementById('inLat').value||'').trim();
+          var lng   =(document.getElementById('inLng').value||'').trim();
+          var lokasi = (lat && lng) ? (lat+','+lng) : '';
+          var kategori = (function(){ var a=document.getElementById('inLangganan'); var b=document.getElementById('inNonLangganan'); if(a&&a.checked) return 'langganan'; if(b&&b.checked) return 'nonlangganan'; return ''; })();
+          if(!nama || !alamat){ setMsg('warning','Nama dan alamat wajib diisi.'); return; }
+          var fotoFile = document.getElementById('inFoto').files[0];
+          var videoFile = (document.getElementById('inVideo')||{}).files ? document.getElementById('inVideo').files[0] : null;
+          var dokumentasi = await toDataURL(fotoFile);
+          var video = await toDataURL(videoFile);
+          var payload = new URLSearchParams({ nama:nama, nopelanggan:nopel, alamat:alamat, kontak:kontak, jenis:jenis, keterangan:ket, lokasi:lokasi, dokumentasi:dokumentasi, video:video, kategori:kategori });
+          setMsg('info','Mengirim...');
+          var resp = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body: payload.toString() });
+          var json = await resp.json();
+          if(json.status==='success'){
+            setMsg('success','Aduan terkirim! Tiket: <strong>'+json.ticket+'</strong><br><small>Form telah direset. Silakan input berikutnya.</small>');
+            _clearInputForm();
+            loadAndRender();
+          }else{
+            setMsg('danger','Gagal: '+(json.message||'Unknown error'));
+          }
+        }catch(e){ console.error(e); setMsg('danger','Gagal mengirim: '+e.message); }
+        finally{ submitBtn.disabled=false; submitBtn.innerHTML='Kirim'; }
+      });
+    })();
+
+    // Detail modal utilities
+    function _esc(s){ s=(s==null?'':String(s)); return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;'); }
+    function _normalizeDrive(u){
+      try{
+        var url = new URL(u);
+        if(url.hostname.indexOf('drive.google.com')>-1){
+          var m = url.pathname.match(/\/file\/d\/([^/]+)\//);
+          if(m && m[1]) return 'https://drive.google.com/uc?export=view&id='+m[1];
+          var id = url.searchParams.get('id');
+          if(id) return 'https://drive.google.com/uc?export=view&id='+id;
+        }
+        // drive.usercontent.google.com download?id=... -> normalize to drive uc view
+        if(url.hostname.indexOf('drive.usercontent.google.com')>-1 || /(^|\.)googleusercontent\.com$/i.test(url.hostname)){
+          var id2 = url.searchParams.get('id');
+          if(id2) return 'https://drive.google.com/uc?export=view&id='+id2;
+        }
+        // pass-through others (e.g., lh3.googleusercontent.com direct image)
+        return u;
+      }catch(e){ return u; }
+    }
+    function _parsePhotos(str){
+      if(!str) return [];
+      var hrefs=Array.from(String(str).matchAll(/href\s*=\s*\"([^\"]+)\"/ig)).map(function(m){return m[1];});
+      var base=hrefs.length?hrefs.join(','):String(str);
+      var arr = base.split(/\s*[,\n;]\s*|\s{2,}/).map(function(s){return s.trim();}).filter(Boolean);
+      var out=[]; for(var i=0;i<arr.length;i++){ var n=_normalizeDrive(arr[i]); if(/^https?:\/\//i.test(n)) out.push(n); }
+      // dedupe
+      return Array.from(new Set(out));
+    }
+    function openDetail(idx){
+      try{
+        var rows = filtered();
+        var r = rows[idx] || {};
+        var fotos = _parsePhotos(r.foto||'');
+        var fotoHtml = fotos.length ? '<div class="photo-grid">'+fotos.map(function(u){return '<a href="'+u+'" target="_blank" rel="noopener"><img src="'+u+'" alt="Foto"/></a>';}).join('')+'</div>' : '<em class="text-secondary">Tidak ada foto</em>';
+        var pelangganHtml = '<table class="table table-dark table-sm mb-0"><tbody>'
+          + '<tr><td class="col-fit">Tiket</td><td><strong>'+ (function(s){ try{ var str=String(s||''); var m=str.match(/^(.*?)(\d+)(\D*)$/); if(!m) return _esc(str||'-'); var pref=m[1]||''; var num=m[2]||''; var suf=m[3]||''; return _esc(pref + String(num).padStart(6,'0') + suf); }catch(_){ return _esc(s||'-'); } })(r.tiket) +'</strong></td></tr>'
+          + '<tr><td>Nama</td><td>'+_esc(r.nama||'-')+'</td></tr>'
+          + '<tr><td>No. Langganan</td><td>'+_esc(r.nopel||'-')+'</td></tr>'
+          + '<tr><td>Alamat</td><td>'+_esc(r.alamat||'-')+'</td></tr>'
+          + '<tr><td>Kontak</td><td>'+_esc(r.kontak||'-')+'</td></tr>'
+          + '<tr><td>Jenis</td><td>'+_esc(r.jenis||'-')+'</td></tr>'
+          + '<tr><td>Tanggal</td><td>'+_esc(r.tanggal||'-')+'</td></tr>'
+          + '</tbody></table>';
+        var ketHtml = '<div class="p-2">'+(_esc(r.ket||'').replace(/\n/g,'<br>')||'<em class="text-secondary">Tidak ada keterangan</em>')+'</div>';
+        document.getElementById('pelangganTab').innerHTML = pelangganHtml;
+        document.getElementById('ketTab').innerHTML = ketHtml;
+        document.getElementById('fotoTab').innerHTML = fotoHtml;
+        // fallback: jika gambar gagal load, tampilkan tombol buka link
+        setTimeout(function(){
+          document.querySelectorAll('#fotoTab .photo-grid img').forEach(function(img){
+            img.addEventListener('error', function(){
+              var u = img.getAttribute('src')||'#';
+              var a = document.createElement('a'); a.href=u; a.target='_blank'; a.rel='noopener'; a.className='btn btn-sm btn-outline-light w-100'; a.textContent='Buka Link Foto'; img.replaceWith(a);
+            }, { once:true });
+          });
+        },0);
+        var modal = new bootstrap.Modal(document.getElementById('detailModal'));
+        modal.show();
+      }catch(e){ console.error(e); }
+    }
 
   </script>
 
@@ -386,8 +790,82 @@
     <a href="Layanan.html" aria-label="Pengaduan"><i class="fas fa-bullhorn"></i></a>
     <a href="tekanan.html" aria-label="Logger"><i class="fas fa-gauge-high"></i></a>
   </nav>
+<script>
+(async function(){
+  const geojsonUrls = [
+    'pelanggan 1.geojson',
+    'pelanggan2.geojson',
+    'planggan3.geojson'
+  ];
+
+  let pelangganData = [];
+
+  async function loadGeoJSON(url) {
+    try {
+      const resp = await fetch(url);
+      const json = await resp.json();
+      if (!json || !json.features) return [];
+
+      return json.features.map(f => {
+        const p = f.properties || {};
+        const c = f.geometry?.coordinates || [];
+
+        return {
+          nopel: (p["no pel"] || p["no_pel"] || p["No Pel"] || p["NoLang"] || p["no"] || p["no pelanggan"] || p["fid"] || "").toString().trim(),
+          nama: p["Name"] || p["Nama"] || "",
+          alamat: p["alamat"] || p["Alamat"] || p["alamat lengkap"] || "",
+          foto: p["foto"] || p["Photo Name"] || "",
+          lat: c[1] || "",
+          lng: c[0] || ""
+        };
+      });
+    } catch (e) {
+      console.warn("Error loading", url, e);
+      return [];
+    }
+  }
+
+  for (const url of geojsonUrls) {
+    const data = await loadGeoJSON(url);
+    pelangganData = pelangganData.concat(data);
+  }
+
+  const inNopel = document.getElementById('inNopel');
+  if (inNopel) {
+    inNopel.addEventListener('input', function() {
+      const val = this.value.trim();
+      const match = pelangganData.find(d => d.nopel === val);
+      if (!match) return;
+
+      // Isi field form
+      if (match.nama)   document.getElementById('inNama').value = match.nama;
+      if (match.alamat) document.getElementById('inAlamat').value = match.alamat;
+
+      if (match.lat && match.lng) {
+        document.getElementById('inLat').value = match.lat.toFixed(6);
+        document.getElementById('inLng').value = match.lng.toFixed(6);
+        document.getElementById('inLatStat').textContent = match.lat.toFixed(6);
+        document.getElementById('inLngStat').textContent = match.lng.toFixed(6);
+        document.getElementById('inAccStat').textContent = 'dari file';
+      }
+
+      // Optional: preview foto (jika ada)
+      if (match.foto && match.foto.startsWith('http')) {
+        const preview = document.createElement('img');
+        preview.src = match.foto;
+        preview.alt = "Foto pelanggan";
+        preview.style = "max-width: 100%; margin-top: 10px;";
+        document.getElementById('fotoPreview')?.replaceChildren(preview);
+      }
+    });
+  }
+})();
+</script>
+
 
 </body>
 
 </html>
+
+
 

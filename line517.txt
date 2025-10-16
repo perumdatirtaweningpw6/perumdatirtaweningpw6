@@ -1,0 +1,1 @@
+          <td>${r.lokasi?`<a href="https://www.google.com/maps?q=${encodeURIComponent(r.lokasi)}" target="_blank">ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â</a>`:''}</td>

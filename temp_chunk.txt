@@ -1,0 +1,45 @@
+
+      const rows = filtered();
+
+      const start = page.idx*page.size;
+
+      const items = rows.slice(start, start+page.size);
+
+      tb.innerHTML = items.map((r,i)=>`
+
+        <tr>
+
+          <td>${start+i+1}</td>
+
+          <td><strong>${r.tiket||''}</strong></td>
+
+          <td>${r.tanggal||''}</td>
+
+          <td>${r.nama||''}<br><small class="text-secondary">${r.nopel||''}</small></td>
+
+          <td>${r.jenis||''}</td>
+
+          <td>${badge(r.status||'')}</td>
+
+          <td>${r.lokasi?`<a href="https://www.google.com/maps?q=${encodeURIComponent(r.lokasi)}" target="_blank">ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â</a>`:''}</td>
+
+          <td>
+
+            <div class="btn-group btn-group-sm">
+
+              <button class="btn btn-outline-light" onclick="setStatus('${r.tiket}','Proses')">Proses</button>
+
+              <button class="btn btn-outline-light" onclick="setStatus('${r.tiket}','Selesai')">Selesai</button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+      `).join('');
+      // Override with custom columns and make tiket clickable to open detail
+      try{
+        (function(){
+          var rowsX = filtered();
+          var startX = page.idx * page.size;
